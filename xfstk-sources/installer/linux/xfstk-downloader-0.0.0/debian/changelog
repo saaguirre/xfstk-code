@@ -1,3 +1,10 @@
+xfstk-downloader (1.7.1)
+
+  * [Bug fix] - bug in api related to OS dnx
+
+  -- Intel Corporation <xfstk@intel.com>  Mon, 21 Jul 2014 08:00:00 -0700
+
+
 xfstk-downloader (1.7.0)
 
   * [New Feature] - OS DnX is now optional for OS flashing Merr/Moor devices

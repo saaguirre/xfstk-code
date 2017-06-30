@@ -1816,11 +1816,11 @@ void mrfdldrstate::Visit(MrfdOsHandleDORM& )
 #if 0
     gettimeofday(&m_start_time, NULL);
 #endif
-    if(m_b_DnX_OS && (strlen(m_fname_dnx_misc) > 0))
+    if(m_b_DnX_OS)
     {
         //Start Misc OS dowload state
         GotoState(DLDR_STATE_OS_MISC);
-    } else if((m_gpflags & 0x1) && (strlen(m_fname_dnx_os) > 0))
+    } else if(m_gpflags & 0x1)
     {
         //Start normal OS dowload state
         GotoState(DLDR_STATE_OS_NORMAL);
