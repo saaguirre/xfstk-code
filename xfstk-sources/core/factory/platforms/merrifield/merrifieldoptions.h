@@ -51,7 +51,8 @@ private:
     bool downloadFW;
     bool downloadOS;
     bool isActionRequired;
-    bool directcsdb;
+    bool initcsdb;
+    bool finalcsdb;
     void UpdateFlags();
     bool allPathsAreValid();
     void ParseLegacy(int, char*[]);
@@ -70,7 +71,7 @@ public:
     const char* GetMiscDnxPath();
     const char* GetMiscBinPath();
     string GetCSDBStatus();
-    bool directCSDBStatus();
+    unsigned char directCSDBStatus();
     unsigned int GetTarget();
     unsigned int GetGPFlags();
     unsigned int GetDebugLevel();

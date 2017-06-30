@@ -37,9 +37,9 @@
 using namespace std;
 
 #define CSDB_BYPASS_STATUS "777"
-#define CSDB_RESULT_OFFSET 12
 #define CSDB_CMD_OFFSET 5
 #define CSDB_SIZE_OFFSET 8
+#define CSDB_RESULT_OFFSET 12
 
 //Dldr state defines, make it similiar to ach code
 #define DLDR_STATE_INVALID     0x5354494EULL //"STIN"
@@ -55,6 +55,9 @@ using namespace std;
 #define DLDR_OS_TOTAL_STEPS       9
 #define DOWNLOAD_FW_PROGRESS      1
 #define DOWNLOAD_OS_PROGRESS      2
+
+#define INITCSDB_MASK 0xF0
+#define FINALCSDB_MASK 0x0F
 
 typedef std::map<unsigned long long, int> ErrorMapType;
 typedef std::map<unsigned long long, IBaseVisitable<> *> HandleMapType;
@@ -110,7 +113,7 @@ public:
     bool IsFwState();
     bool IsOsState();
     int getResponseBuffer(unsigned char* idrqbuf,int maxsize);
-    void SetCsdbStatus(string csdb, bool direct);
+    void SetCsdbStatus(string csdb, BYTE direct);
     void InitStepsDone();
     void LogProgress();
 
@@ -176,7 +179,9 @@ private:
     char* m_fname_os_image;
     char* m_fname_bin_misc;
     string csdbStatus;
-    bool directcsdbStatus;
+    //Bit 0 is final
+    //Bit 4 is inital
+    BYTE directcsdbStatus;
     unsigned long m_gpflags;
     IDevice * m_usbdev;
     MerrifieldUtils* m_utils;

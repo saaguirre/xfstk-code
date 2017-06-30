@@ -22,7 +22,6 @@
 #include <map>
 #include "boost/lexical_cast.hpp"
 
-#define CSDB_HEADER_SIZE 12
 #define FW_DATA_RUPHS   0
 #define FW_DATA_RUPH	1
 #define FW_DATA_IFWI	2

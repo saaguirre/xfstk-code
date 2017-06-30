@@ -358,7 +358,7 @@ void xfstkdldrapi::setcsdbResponsebuffer(unsigned char *responseBuffer, int maxs
     xfstkdldrfactory* xfstkfactoryinterface = (xfstkdldrfactory*)xfstkfactoryhandle;
     xfstkfactoryinterface->SetIdrqResponse(responseBuffer,maxsize);
 }
-bool xfstkdldrapi::downloadcsdb(char *fwdnx, char *miscbin, char *cmdcode,char *fwimage, bool directdownload)
+bool xfstkdldrapi::downloadcsdb(char *fwdnx, char *miscbin, char *cmdcode,char *fwimage, bool )
 {
     int tmpargc = 8;
     char* tmpargv[11];
@@ -419,12 +419,6 @@ bool xfstkdldrapi::downloadcsdb(char *fwdnx, char *miscbin, char *cmdcode,char *
         tmpargv[9] = &arg9[0];
         tmpargc += 2;
     }
-    if(directdownload)
-    {
-        sprintf(arg10.get(), "--directcsdb");
-        tmpargv[tmpargc] = &arg10[0];
-        tmpargc++;
-    }
     // Detect the device type and create the downloader interfaces
     int devicedetected = 0;
     while(!xfstkfactoryinterface->EnumerateDevices()) {
@@ -471,6 +465,104 @@ bool xfstkdldrapi::downloadcsdb(char *fwdnx, char *miscbin, char *cmdcode,char *
     this->releaseinterface();
     return true;
 }
+bool xfstkdldrapi::downloadcli(const char *cli)
+{
+    int tmpargc = 10;
+    char* tmpargv[MAX_ARGS];
+    xfstksleep sleeper;
+    boost::scoped_array<char> message (new char[1024]);
+    xfstkdldrfactory* xfstkfactoryinterface = (xfstkdldrfactory*)xfstkfactoryhandle;
+    this->showversion();
+
+    if(!this->interfaceavailable())
+    {
+        return false;
+    }
+    if(!this->claiminterface())
+    {
+        return false;
+    }
+    // Detect the device type and create the downloader interfaces
+    int devicedetected = 0;
+    while(!xfstkfactoryinterface->EnumerateDevices()) {
+        xfstklogmessage(const_cast<char*>("XFSTK-PROGRESS--0"),this->physclientdata);
+        sprintf(message.get(),"XFSTK-STATUS--Detecting Intel Device - Attempt #%d",devicedetected);
+        xfstklogmessage(message.get(),this->physclientdata);
+        xfstklogmessage(const_cast<char*>("XFSTK-PROGRESS--5"),this->physclientdata);
+        if(devicedetected > this->retrycount) {
+            xfstklogmessage(const_cast<char* >("XFSTK-STATUS--Aborting download process."), const_cast<void* >(this->physclientdata));
+            xfstklogmessage(const_cast<char* >("XFSTK-PROGRESS--100"), const_cast<void* >(this->physclientdata));
+            xfstkfactoryinterface->ClearAllLists();
+            return false;
+        }
+        devicedetected++;
+        sleeper.sleep(1);
+    }
+
+    QString cliQstr(cli);
+    QStringList args = cliQstr.split("--");
+    tmpargc = args.size();
+
+    int j = 0;
+    for(int i = 0 ; i<tmpargc && j<MAX_ARGS; ++i)
+    {
+        QString localStr = args.at(i);
+        //the first arg 'cli::' is not needed
+        localStr.prepend("--");
+        QStringList splitz = localStr.trimmed().split(" ");
+        foreach(QString strz,splitz)
+        {
+            tmpargv[j] = new char[strz.size() + 1];
+            memset(tmpargv[j],0,strz.size() + 1);
+            strcpy(tmpargv[j],strz.trimmed().toStdString().c_str());
+            j++;
+        }
+
+    }
+
+    tmpargc = j;
+
+    //Parse the options from the user
+    bool retval = xfstkfactoryinterface->SetOptions(tmpargc,tmpargv);
+    for(int i = 0; i < tmpargc; ++i)
+    {
+        if(tmpargv[i])
+        {
+            delete [] tmpargv[i];
+            tmpargv[i] = NULL;
+        }
+    }
+
+    if(!retval) {
+        printf("XFSTK: Download options could not be parsed correctly.\n");
+        printf("XFSTK: Please connect only a single SoC device and cycle device power.\n");
+        printf("XFSTK: Aborting download process.\n");
+        xfstkfactoryinterface->ClearAllLists();
+        return false;
+    }
+    //Bind all interfaces together
+    if(!xfstkfactoryinterface->BindInterfaces()) {
+        printf("XFSTK: Binding failed for Download, Device, and Options interfaces.\n");
+        printf("XFSTK: Aborting download process.\n");
+        xfstkfactoryinterface->ClearAllLists();
+        return false;
+    }
+    //Execute the download
+    xfstkfactoryinterface->retrycount = this->retrycount;
+    if(!xfstkfactoryinterface->ExecuteDownloadSerial()) {
+        printf("XFSTK: Download operation encountered errors.\n");
+        printf("XFSTK: Please verify fw/os image integrity and reprovision target.\n");
+        xfstkfactoryinterface->ClearAllLists();
+        return false;
+    }
+    printf( "\nXFSTK: Transfer Completed Successfully.\n");
+    if(physstatuspfn)
+        physstatuspfn(const_cast<char* >("Success: Download of FW Completed."), const_cast<void* >(this->physclientdata));
+    xfstkfactoryinterface->ClearAllLists();
+    this->releaseinterface();
+    return true;
+}
+
 bool xfstkdldrapi::downloadfw(char *fwdnx, char *fwimage, char *gpflags)
 {
     int tmpargc = 10;
@@ -586,6 +678,7 @@ bool xfstkdldrapi::downloadfw(char *fwdnx, char *fwimage, char *gpflags)
     this->releaseinterface();
     return true;
 }
+
 bool xfstkdldrapi::downloados(char *osdnx, char *osimage, char *gpflags)
 {
     int tmpargc = 10;
@@ -1188,7 +1281,7 @@ void xfstkdldrapi::showversion(void)
 {
     char* message = new char[256];
     memset(message,0,256);
-    sprintf(message,"\nXFSTK Downloader API %s \nCopyright (c) 2013 Intel Corporation\n", DOWNLOADER_VERSION);
+    sprintf(message,"\nXFSTK Downloader API %s \nCopyright (c) 2014 Intel Corporation\n", DOWNLOADER_VERSION);
     xfstklogmessage(message,this->physclientdata);
     delete[] message;
 }

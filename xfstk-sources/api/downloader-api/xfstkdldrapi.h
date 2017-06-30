@@ -57,7 +57,7 @@
 #define LOG_PROGRESS    0x1000
 #define DEBUG_ERROR     0xfffffff1
 #define LOG_ALL         0xffffffff
-
+#define MAX_ARGS 32
 /*!
     \struct LastError
     \brief The last error happened during download
@@ -119,6 +119,7 @@ typedef void(*xfstkstatuspfn)(char* status, void *);
 
     \image html xfstkcmdclientflow.png
 
+REM 
 */
 class XFSTKDLDRAPISHARED_EXPORT xfstkdldrapi {
 public:
@@ -146,7 +147,14 @@ public:
      *  \note Method currently only works for Merrifield platforms only
      */
     virtual bool idrqresponse(unsigned char *buffer, int maxsize);
-	
+
+    /*! \brief API method to simulate CLI
+     *  \param CLI string
+     *  \return TRUE if operation was a success or else FALSE
+     *  \exception none
+     */
+    virtual bool downloadcli(const char *cli);
+
     /*! \brief Allows downloading a fwimage via spi
      *  \param fwfile is the file that is downloaded
      *  \return TRUE if downloads without error
@@ -172,18 +180,17 @@ public:
      */
     virtual void setcsdbResponsebuffer(unsigned char* responseBuffer, int maxsize);
 
-    /*! \brief Download a CSDB to a device
+    /*! \brief Performs single shot firmware and operating system download.
      *  \param fwdnx Firmware download and execute (DnX) module.
-     *  \param miscbin CSDB payload file
-     *  \param cmdCode CSDB command code
-     *  \param fwimage Optional firmware image to perform firmware provision
-     *  \param directdownload Optional set to true to directly send CSDB to device
-     *  \return
-     *  \exception
-     *  \note
+     *  \param miscbin CSDB Payload file
+     *  \param cmdcode CSDB command code
+     *  \param fwimage Firmware binary image.
+     *  \param direct command no longer valid
+     *  \return True / False status indicating provisioning success / failure.
+     *  \exception None
+     *  \note It is recommended to use the downloadcli() method for CSDB instead
      */
-    virtual bool downloadcsdb(char *fwdnx, char *payload, char *cmdCode, char *fwimage = NULL, bool directdownload = false);
-
+    virtual bool downloadcsdb(char *fwdnx, char *miscbin, char *cmdcode,char *fwimage, bool direct );
     /*! \brief Performs single shot firmware only download.
      *  \param fwdnx Firmware download and execute (DnX) module.
      *  \param fwimage Firmware binary image.

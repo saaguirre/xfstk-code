@@ -45,6 +45,7 @@
 #define LOG_PROGRESS    0x1000
 #define DEBUG_ERROR     0xfffffff1
 #define LOG_ALL         0xffffffff
+#define CSDB_HEADER_SIZE 16
 
 class MerrifieldUtils
 {

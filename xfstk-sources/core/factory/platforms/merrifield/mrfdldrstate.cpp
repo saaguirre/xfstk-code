@@ -26,6 +26,9 @@
 #include "merrifieldmessages.h"
 #include "mrfdldrstate.h"
 #include <fstream>
+#include "../../common/scoped_file.h"
+#include <QTime>
+#include <string>
 
 #define USB_READ_WRITE_DELAY_MS 0
 
@@ -59,6 +62,7 @@ mrfdldrstate::mrfdldrstate()
 
     m_mfld_fw = NULL;
     m_mfld_os = NULL;
+    directcsdbStatus = 0;
 
     m_delay_ms = USB_READ_WRITE_DELAY_MS;
 
@@ -230,7 +234,7 @@ bool mrfdldrstate::SetIDRQstatus(bool idrq)
     return this->m_b_IDRQ;
 }
 
-void mrfdldrstate::SetCsdbStatus(string csdb, bool direct)
+void mrfdldrstate::SetCsdbStatus(string csdb, BYTE direct)
 {
     this->csdbStatus = csdb;
     this->directcsdbStatus = direct;
@@ -804,13 +808,41 @@ void mrfdldrstate::Visit(MrfdFwHandleUCSDB& )
     memset(buffer.get(),0,MAX_CSDB_PAYLOAD);
     StartLogTime();
     this->m_utils->u_log(LOG_STATUS, "FW: Receiving Refreshed CSDB ...");
+    //Read the uploaded CSDB
     if(ReadInPipe(buffer.get(),MAX_CSDB_PAYLOAD))
     {
         memcpy(&cmd_code,buffer.get() + CSDB_CMD_OFFSET , sizeof(BYTE));
         memcpy(&ret_code,buffer.get() + CSDB_RESULT_OFFSET , sizeof(DWORD));
         memcpy(&csdb_size,buffer.get() + CSDB_SIZE_OFFSET , sizeof(DWORD));
-        //halt command received
-        if(cmd_code == 0x1)
+
+        //if there is a payload, dump to file
+        if(csdb_size && (csdb_size - CSDB_HEADER_SIZE) > 0)
+        {
+            QString curTime = QDateTime::currentDateTime().toString()\
+                    .replace(":","_").replace(" ","_");
+            std::string currentTime = "./csdb_payload_" + \
+                    curTime.toStdString() +".bin";
+            try
+            {
+                scoped_file fileout(currentTime.c_str(),"wb");
+                if(fileout.valid())
+                {
+                    fileout.write(buffer.get(),1,csdb_size);
+                    this->m_utils->u_log(LOG_STATUS, "CSDB payload dumped to file: %s",currentTime.c_str());
+                }
+                else
+                {
+                    this->m_utils->u_log(LOG_STATUS, "Unable to dump CSDB payload");
+                }
+            }
+            catch(std::exception& e)
+            {
+                this->m_utils->u_log(LOG_STATUS, "Error dumping CSDB payload: %s", e.what());
+            }
+        }
+
+        //if the final csdb bit has been set, then send a halt command to chaabi
+        if((this->directcsdbStatus & FINALCSDB_MASK))
         {
             dnx_data* fwdata = NULL;
             if(!m_mfld_fw)
@@ -818,6 +850,7 @@ void mrfdldrstate::Visit(MrfdFwHandleUCSDB& )
                 LogError(0xBADF00D);
                 return;
             }
+            //read in the last csdb payload
             fwdata = m_mfld_fw->GetFwImageData(FW_DATA_CSDB);
             if(!fwdata)
             {
@@ -825,16 +858,23 @@ void mrfdldrstate::Visit(MrfdFwHandleUCSDB& )
                 LogError(0xBADF00D);
                 return;
             }
-            memcpy(fwdata->data + CSDB_CMD_OFFSET, &cmd_code, sizeof(cmd_code));
+            BYTE haltCode = 0x1;
+            //replace the command with halt command
+            memcpy(fwdata->data + CSDB_CMD_OFFSET, &haltCode, sizeof(haltCode));
+            this->GotoState(BULK_ACK_DCSDB);
+        }
+        else
+        {
+            m_fw_done = true;
         }
         if(ret_code != 0)
         {
             this->m_last_error.error_code = ret_code;
             strcpy(this->m_last_error.error_message, "CSDB returned nonzero result status");
+            this->m_utils->u_log(LOG_STATUS, "CSDB returned nonzero result status of:0x%X",ret_code);
         }
         this->ResponseBuff.swap(buffer);
         this->ResponseBuffSize = csdb_size;
-        this->GotoState(BULK_ACK_DCSDB);
     }else
     {
         this->m_abort = true;
@@ -966,7 +1006,6 @@ void mrfdldrstate::Visit(MrfdFwHandleDIFWI& )
             byteBlock[i] = *(fwdata->data + m_ifwiArrayPtr);
             m_ifwiArrayPtr++;
         }
-
         if(fwdata && !WriteOutPipe(byteBlock, ONE28_K))
         {
             ret_code = 1; //USB error
@@ -1755,7 +1794,7 @@ bool mrfdldrstate::Start()
         this->m_utils->u_log(LOG_OPCODE, "Sending IDRQ...");
         preamble_msg = PREAMBLE_IDRQ;
     }
-    else if(this->directcsdbStatus)
+    else if(!(this->directcsdbStatus & INITCSDB_MASK))
     {
         m_mfld_fw = new MerrifieldFW;
 

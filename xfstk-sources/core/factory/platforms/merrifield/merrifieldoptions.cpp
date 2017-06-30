@@ -69,6 +69,8 @@ void MerrifieldOptions::Parse(int argc, char* argv[])
     ("idrq",       po::bool_switch()->default_value(0), "Optional argument. Indicates whether IDRQ is used. 1 means idrq is used, 0 means idrq is not used.")
     ("verbose,v",  po::bool_switch()->default_value(0), "Optional argument. Display debug information.")
     ("csdb",       po::value<std::string>()->default_value(" "), "Optional argument. Enable Chaabi specific data block, specify op code as argument parameter.")
+    ("initcsdb",   po::value<std::string>()->default_value("1"), "Send the first CSDB of a sequence")
+    ("finalcsdb",  po::value<std::string>()->default_value("1"), "Send the last CSDB of a sequence")
     ;
 
     options_description cmdlineOptions;
@@ -86,7 +88,6 @@ void MerrifieldOptions::Parse(int argc, char* argv[])
     visibleOptions.add(primaryOptions);
 
     primaryOptions.add_options()
-            ("directcsdb", po::bool_switch()->default_value(0), "Directly send csdb Chaabi specific data block without dnx interaction")
             ("softfuse",  po::value<std::string>()->default_value("BLANK.bin"), "Softfuse Path");
     cmdlineOptions.add(primaryOptions);
 
@@ -159,10 +160,19 @@ void MerrifieldOptions::Parse(int argc, char* argv[])
             }
         }
 
-        if(vm.count("directcsdb"))
+        if(vm.count("initcsdb"))
         {
-            this->directcsdb = vm["directcsdb"].as<bool>();
-            this->directcsdb = this->directcsdb && (this->csdbStatus != " ");
+            this->initcsdb = vm["initcsdb"].as<string>() != "0";
+            if(!this->initcsdb && this->csdbStatus == " ")
+            {
+                cout << "Improper usage of initcsdb options!!!" << endl;
+                this->isActionRequired = false;
+            }
+
+        }
+        if(vm.count("finalcsdb"))
+        {
+            this->finalcsdb = vm["finalcsdb"].as<string>() != "0";
         }
 
         if(vm.count("gpflags"))
@@ -428,12 +438,12 @@ string MerrifieldOptions::GetCSDBStatus()
     return this->csdbStatus;
 }
 
-/** \brief The status of CSDB.
+/** \brief The status of CSDB. Bit 4 is init, bit 0 is final
   * @return The status of CSDB.
   */
-bool MerrifieldOptions::directCSDBStatus()
+unsigned char MerrifieldOptions::directCSDBStatus()
 {
-    return this->directcsdb;
+    return initcsdb << 4 | finalcsdb;
 }
 
 /** \brief The GPFlags value used to control download????
@@ -687,7 +697,7 @@ bool MerrifieldOptions::validateCSDBState()
     bool retval = false;
     if(miscBinPath == "BLANK.bin")
     {
-        if(csdbStatus == "1" || csdbStatus =="2")
+        if(csdbStatus == "1" || csdbStatus =="2" || csdbStatus =="10")
             retval = true;
     }else
     {

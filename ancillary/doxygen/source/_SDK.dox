@@ -141,8 +141,22 @@
 		<tr>
 			<td><b>--csdb arg (=0)</b></td>
 			<td>
-			<p>Optional argument. Exchange the chaabi specific data block specified in --miscbin par</p>
+			<p>Optional argument. Exchange the chaabi specific data block specified in --miscbin parameter</p>
 			<p>Use the command code of the provision as the input argument.
+			</td>
+		</tr>
+		<tr>
+			<td><b>--initcsdb arg (=1)</b></td>
+			<td>
+			<p>Optional argument. Signals whether command is first csdb command in a series</p>
+			<p>Use value of 1 means first command, else use value of 0.
+			</td>
+		</tr>
+		<tr>
+			<td><b>--finalcsdb arg (=1)</b></td>
+			<td>
+			<p>Optional argument. Signals whether command is last csdb command in a series</p>
+			<p>Use value of 1 means last command, else use value of 0.
 			</td>
 		</tr>
 		<tr>
@@ -173,6 +187,15 @@
         <dd><pre>xfstk-dldr-solo spi --fwimage /intel/fwimage.bin</pre></dd>
     <dt><b>Perform CSDB Provision: Lifetime Refresh (Merrifield B0)</b></dt>
         <dd><pre>xfstk-dldr-solo --fwdnx /intel/fwdnx.bin --miscbin /intel/payload.bin --csdb 2</pre></dd>
+ 	</dl>
+    <dt><b>Perform CSDB Provision: First command in a sequence of commands</b></dt>
+        <dd><pre>xfstk-dldr-solo --fwdnx /intel/fwdnx.bin --miscbin /intel/payload.bin --csdb *command code* --initcsdb 1 --finalcsdb 0</pre></dd>
+ 	</dl>
+    <dt><b>Perform CSDB Provision: Middle command in a sequence of commands</b></dt>
+        <dd><pre>xfstk-dldr-solo --fwdnx /intel/fwdnx.bin --miscbin /intel/payload.bin --csdb *command code* --initcsdb 0 --finalcsdb 0</pre></dd>
+ 	</dl>
+    <dt><b>Perform CSDB Provision: Last command in a sequence of commands</b></dt>
+        <dd><pre>xfstk-dldr-solo --fwdnx /intel/fwdnx.bin --miscbin /intel/payload.bin --csdb *command code* --initcsdb 0 --finalcsdb 1</pre></dd>
  	</dl>
 
     \section debuglevel_defines Debug Level Bit Definitions

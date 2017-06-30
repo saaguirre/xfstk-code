@@ -1,3 +1,12 @@
+xfstk-downloader (1.5.6) unstable; urgency=low
+
+  * [Bug fix] BZ163978 - XFSTK reports failure during CSDB update
+  * [Bug fix] BZ185826 - Merrifield and Moorefield: Unable to write CSDB payload when provisioning the CSDB payload with IFWI
+  * [Bug fix] BZ191640 - CSDB Response payload and Halt Request not handled by xFSTK
+
+ -- Intel Corporation <xfstk@intel.com>  Thu, 29 May 2014 08:00:00 -0700
+
+
 xfstk-downloader (1.5.5) unstable; urgency=low
 
   * [New Feature] - Added support for customer footer (MOFD platforms only).

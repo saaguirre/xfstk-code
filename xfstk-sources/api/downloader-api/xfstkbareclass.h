@@ -152,6 +152,34 @@ public:
      */
     virtual bool hashverify(char *hashfile, bool write);
 
+    /*! \brief API method to simulate CLI
+     *  \param CLI string
+     *  \return TRUE if operation was a success or else FALSE
+     *  \exception none
+     */
+    virtual bool downloadcli(const char *cli);
+	
+    /*! \brief Set the response buffer for the CSDB provisioning
+     *  \param responseBuffer buffer to be used
+     *  \param maxsize the maximum size of the buffer
+     *  \return none
+     *  \exception
+     *  \note Call this before running the downloadcsdb() function
+     */
+    virtual void setcsdbResponsebuffer(unsigned char* responseBuffer, int maxsize);
+
+    /*! \brief Performs single shot firmware and operating system download.
+     *  \param fwdnx Firmware download and execute (DnX) module.
+     *  \param miscbin CSDB Payload file
+     *  \param cmdcode CSDB command code
+     *  \param fwimage Firmware binary image.
+     *  \param direct command no longer valid
+     *  \return True / False status indicating provisioning success / failure.
+     *  \exception None
+     *  \note It is recommended to use the downloadcli() method for CSDB instead
+     */
+    virtual bool downloadcsdb(char *fwdnx, char *miscbin, char *cmdcode,char *fwimage, bool direct );
+	
     /*! \brief Performs single shot firmware only download.
      *  \param fwdnx Firmware download and execute (DnX) module.
      *  \param fwimage Firmware binary image.

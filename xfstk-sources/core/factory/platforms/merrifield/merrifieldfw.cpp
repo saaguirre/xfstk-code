@@ -906,7 +906,7 @@ bool MerrifieldFW::InitCSDB(const string& csdbstatus)
             //check to see if file is payload or full csdb structure.
             if(m_csdb_size >4 ? (std::string(reinterpret_cast<const char*>(m_csdb),4) != "CSDB") : 1)
             {
-                if((m_csdb_size + CSDB_HEADER_SIZE)> (1024*128))
+                if((m_csdb_size + CSDB_HEADER_SIZE)> (MAX_CSDB_PAYLOAD))
                     throw std::runtime_error("Error CSDB payload too large");
 
 
@@ -940,6 +940,9 @@ bool MerrifieldFW::InitCSDB(const string& csdbstatus)
                 if(m_csdb)
                 memcpy(m_csdb, tmp.get(),m_csdb_size);
             }
+
+            realloc_array(m_csdb,m_csdb_size,MAX_CSDB_PAYLOAD);
+            m_csdb_size = MAX_CSDB_PAYLOAD;
 
             if(!restructFUPH())
                 throw std::runtime_error("Error restructuring FUPH");

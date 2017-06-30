@@ -108,6 +108,7 @@ bool xfstkdldrfactory::ClearAllLists()
         if(xfstkdownloader != NULL) {
             delete xfstkdownloader;
             xfstkdownloader = NULL;
+            this->XfstkDownloaderList.removeAt(0);
         }
     }
     this->XfstkDownloaderList.clear();

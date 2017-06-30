@@ -88,7 +88,8 @@ void MedfieldOptions::Parse(int argc, char* argv[])
 
     primaryOptions.add_options()
             ("csdb",       po::value<std::string>()->default_value(" "), "Optional argument. 'update' or 'challenge' Chaabi specific data block.")
-            ("directcsdb", po::bool_switch()->default_value(0), "Directly send csdb Chaabi specific data block without dnx interaction")
+            ("initcsdb",   po::value<std::string>()->default_value("1"), "Send the first CSDB of a sequence")
+            ("finalcsdb",  po::value<std::string>()->default_value("1"), "Send the last CSDB of a sequence")
             ("miscbin",    po::value<std::string>()->default_value("BLANK.bin"), "File path for micellaneous binary file")
             ("softfuse",   po::value<std::string>()->default_value("BLANK.bin"), "Softfuse Path");
     cmdlineOptions.add(primaryOptions);
@@ -211,11 +212,6 @@ void MedfieldOptions::Parse(int argc, char* argv[])
             this->miscBinPath = vm["miscbin"].as<string>();
         }
 
-        if(vm.count("csdb"))
-        {
-            this->csdbStatus = vm["csdb"].as<string>();
-        }
-
         if(vm.count("idrq"))
         {
             this->idrqEnabled = vm["idrq"].as<bool>();
@@ -227,6 +223,20 @@ void MedfieldOptions::Parse(int argc, char* argv[])
             sscanf(targetHexFormat.c_str(), "%x", &this->targetIndex);
         }
 
+        if(vm.count("csdb"))
+        {
+            this->csdbStatus = vm["csdb"].as<string>();
+        }
+
+        if(vm.count("initcsdb"))
+        {
+            bool initcsdb = vm["initcsdb"].as<string>() != "0";
+            if(!initcsdb && this->csdbStatus == " ")
+            {
+                throw MedfieldOptionsExceptions("Improper usage of initcsdb options!!!");
+            }
+
+        }
         this->UpdateFlags();
 
         if(!this->allPathsAreValid())
