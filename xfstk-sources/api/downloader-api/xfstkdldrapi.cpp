@@ -676,7 +676,7 @@ bool xfstkdldrapi::downloados(char *osdnx, char *osimage, char *gpflags)
     xfstkdldrfactory* xfstkfactoryinterface = (xfstkdldrfactory*)xfstkfactoryhandle;
     this->showversion();
     //Print options
-    sprintf(message.get(),"\nosdnx -- %s\n", osdnx);
+    sprintf(message.get(),"\nosdnx -- %s\n", osdnx ? osdnx : "");
     xfstklogmessage(message.get(),this->physclientdata);
     sprintf(message.get(),"osimage -- %s\n", osimage);
     xfstklogmessage(message.get(),this->physclientdata);
@@ -704,7 +704,7 @@ bool xfstkdldrapi::downloados(char *osdnx, char *osimage, char *gpflags)
     //xfstk-dldr-solo --fwdnx /intel/BLANK.bin --fwimage /intel/BLANK.bin --osdnx /intel/osdnx.bin --osimage /intel/osimage.bin --gpflags 80000001
     sprintf(arg0.get(),"xfstk-dldr-api");
     sprintf(arg1.get(), "--osdnx");
-    sprintf(arg2.get(), "%s", osdnx);
+    sprintf(arg2.get(), "%s", osdnx ? osdnx : "");
     sprintf(arg3.get(), "--osimage");
     sprintf(arg4.get(), "%s", osimage);
     sprintf(arg5.get(), "--gpflags");
@@ -798,7 +798,7 @@ bool xfstkdldrapi::downloadfwos(char *fwdnx, char *fwimage, char *osdnx, char* o
     xfstklogmessage(message.get(),this->physclientdata);
     sprintf(message.get(),"\nfwimage -- %s\n", fwimage);
     xfstklogmessage(message.get(),this->physclientdata);
-    sprintf(message.get(),"\nosdnx -- %s\n", osdnx);
+    sprintf(message.get(),"\nosdnx -- %s\n", osdnx ? osdnx : "");
     xfstklogmessage(message.get(),this->physclientdata);
     sprintf(message.get(),"osimage -- %s\n", osimage);
     xfstklogmessage(message.get(),this->physclientdata);
@@ -835,7 +835,7 @@ bool xfstkdldrapi::downloadfwos(char *fwdnx, char *fwimage, char *osdnx, char* o
     sprintf(arg3.get(),"--fwimage");
     sprintf(arg4.get(),"%s",fwimage);
     sprintf(arg5.get(), "--osdnx");
-    sprintf(arg6.get(), "%s", osdnx);
+    sprintf(arg6.get(), "%s", osdnx ? osdnx : "");
     sprintf(arg7.get(), "--osimage");
     sprintf(arg8.get(), "%s", osimage);
     sprintf(arg9.get(), "--gpflags");
@@ -933,7 +933,7 @@ bool xfstkdldrapi::downloadfwos(char *fwdnx, char *fwimage, char *osdnx, char* o
     xfstklogmessage(message.get(),this->physclientdata);
     sprintf(message.get(),"\nfwimage -- %s\n", fwimage);
     xfstklogmessage(message.get(),this->physclientdata);
-    sprintf(message.get(),"\nosdnx -- %s\n", osdnx);
+    sprintf(message.get(),"\nosdnx -- %s\n", osdnx ? osdnx : "");
     xfstklogmessage(message.get(),this->physclientdata);
     sprintf(message.get(),"osimage -- %s\n", osimage);
     xfstklogmessage(message.get(),this->physclientdata);
@@ -974,7 +974,7 @@ bool xfstkdldrapi::downloadfwos(char *fwdnx, char *fwimage, char *osdnx, char* o
     sprintf(arg3.get(),"--fwimage");
     sprintf(arg4.get(),"%s",fwimage);
     sprintf(arg5.get(), "--osdnx");
-    sprintf(arg6.get(), "%s", osdnx);
+    sprintf(arg6.get(), "%s", osdnx ? osdnx : "");
     sprintf(arg7.get(), "--osimage");
     sprintf(arg8.get(), "%s", osimage);
     sprintf(arg9.get(), "--gpflags");
@@ -1077,7 +1077,7 @@ bool xfstkdldrapi::downloadmtfwosasync(char *fwdnx, char *fwimage, char *osdnx, 
     xfstklogmessage(message.get(),this->physclientdata);
     sprintf(message.get(),"\nfwimage -- %s\n", fwimage);
     xfstklogmessage(message.get(),this->physclientdata);
-    sprintf(message.get(),"\nosdnx -- %s\n", osdnx);
+    sprintf(message.get(),"\nosdnx -- %s\n", osdnx ? osdnx : "");
     xfstklogmessage(message.get(),this->physclientdata);
     sprintf(message.get(),"osimage -- %s\n", osimage);
     xfstklogmessage(message.get(),this->physclientdata);
@@ -1135,7 +1135,7 @@ bool xfstkdldrapi::downloadmtfwosasync(char *fwdnx, char *fwimage, char *osdnx, 
     xfstklogmessage(message.get(),this->physclientdata);
     sprintf(message.get(),"\nfwimage -- %s\n", fwimage);
     xfstklogmessage(message.get(),this->physclientdata);
-    sprintf(message.get(),"\nosdnx -- %s\n", osdnx);
+    sprintf(message.get(),"\nosdnx -- %s\n", osdnx ? osdnx : "");
     xfstklogmessage(message.get(),this->physclientdata);
     sprintf(message.get(),"osimage -- %s\n", osimage);
     if(this->miscdnxenable)

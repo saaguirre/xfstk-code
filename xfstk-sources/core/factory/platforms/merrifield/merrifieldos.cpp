@@ -89,10 +89,6 @@ bool MerrifieldOS::Init(char* dnx_os_name, char* os_image_name,
 
     m_utils = utils;
 
-    ret = CheckFile(dnx_os_name);
-    if(!ret)
-        return false;
-
     ret = CheckFile(os_image_name);
     if(!ret)
         return false;
@@ -111,7 +107,13 @@ bool MerrifieldOS::Init(char* dnx_os_name, char* os_image_name,
     if(ret)
         ret = InitOsipHdr();
 
-    ret = InitOsDnX();
+    if(validDnX())
+    {
+        ret = CheckFile(dnx_os_name);
+        if(!ret)
+            return false;
+        ret = InitOsDnX();
+    }
 
     return ret;
 }
@@ -644,4 +646,21 @@ bool MerrifieldOS::initChaabiSize()
         }
     }
     return fwfoundFound & tokenFound;
+}
+
+//Determine if there is a valid OS DnX
+bool MerrifieldOS::validDnX()
+{
+    bool retval = false;
+
+    //API can provide null pointer for OS DnX
+    if(m_dnx_os_name != NULL)
+    {
+        std::string dnx(m_dnx_os_name);
+        //Default DnX for CLI is BLANK.bin
+        //Default DnX for GUI is N/A
+        //API can provide empty string "" as dnx
+        retval = !dnx.empty() && (dnx != "BLANK.bin") && (dnx != "N/A");
+    }
+    return retval;
 }

@@ -241,7 +241,7 @@ void MerrifieldOptions::Parse(int argc, char* argv[])
         {
             if(vm["gpflags"].as<string>().empty())
             {
-                this->gpFlags = ((this->osDnxPath != "BLANK.bin") && (this->osImagePath != "BLANK.bin")) ? 0x80000001 : 0x80000000;
+                this->gpFlags = ((this->osImagePath != "BLANK.bin")) ? 0x80000001 : 0x80000000;
             }else
             {
                 gpflagsHexFormat = vm["gpflags"].as<string>();
@@ -639,7 +639,7 @@ bool MerrifieldOptions::IsWipeIfwiEnabled()
 inline void MerrifieldOptions::UpdateFlags()
 {
     this->downloadFW = (this->fwDnxPath.length() > 0 && this->fwImagePath.length() > 0);
-    this->downloadOS = (this->osDnxPath.length() > 0 && this->osImagePath.length() > 0);
+    this->downloadOS = this->osImagePath.length() > 0;
     bool idrq = this->idrqEnabled && (this->miscBinPath.compare("BLANK.bin") != 0);
     bool csdb = (this->csdbStatus != " " );
     this->isActionRequired = (this->downloadFW || this->downloadOS || idrq || csdb || this->performEmmcDump);

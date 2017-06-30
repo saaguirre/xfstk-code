@@ -116,7 +116,7 @@ bool xfstkdldrthreadobj::downloadmtfwosthread()
     sprintf(arg3.get(),"--fwimage");
     sprintf(arg4.get(),"%s",fwimage);
     sprintf(arg5.get(), "--osdnx");
-    sprintf(arg6.get(), "%s", osdnx);
+    sprintf(arg6.get(), "%s", osdnx ? osdnx : "");
     sprintf(arg7.get(), "--osimage");
     sprintf(arg8.get(), "%s", osimage);
     sprintf(arg9.get(), "--gpflags");

@@ -38,6 +38,7 @@ public:
     dnx_data* GetChaabiDnX();
     dnx_data* GetNoSizeData();
     unsigned long long GetOsImageDataSize();
+    bool validDnX();
 
 private:
     bool initChaabiSize();

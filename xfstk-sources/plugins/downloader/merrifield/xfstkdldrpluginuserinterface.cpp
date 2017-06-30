@@ -693,24 +693,6 @@ void XfstkDldrPluginUserInterface::BeginDownload()
         GPFlagsOverride = "0x80000001";
     }
 
-    if(FWDnX != "N/A" && FWImage != "N/A" && (OSDnX == "N/A" || OSImage == "N/A")) {
-
-        //If FW only clear bit 1 even if user set it.
-        QString tmpGPFlagsOverride = GPFlagsOverride;
-
-        QMessageBox Message;
-        bool ok;
-        unsigned long tmpgpflags = tmpGPFlagsOverride.toULong(&ok, 16);
-        if(tmpgpflags & 1) {
-            if(this->CurrentState.EnableGpFlagOverride){
-                Message.setText("OS dnx or OS image path is invalid but gpflags is set to download OS.");
-                Message.exec();
-            }
-            tmpgpflags &= 0xFFFFFFFE;
-            GPFlagsOverride = tmpGPFlagsOverride.number(tmpgpflags, 16).toUpper();
-        }
-    }
-
     this->baFWDnx = FWDnX.toLatin1();
     this->baFWImage = FWImage.toLatin1();
     this->baOSDnx = OSDnX.toLatin1();
@@ -730,7 +712,7 @@ void XfstkDldrPluginUserInterface::BeginDownload()
     this->CurrentState.StatusListLocation = 0;
     this->CurrentState.StatusListPrevLength = 0;
 
-    if(FWDnX != "N/A" && FWImage != "N/A" && OSDnX != "N/A" && OSImage != "N/A") {
+    if(FWDnX != "N/A" && FWImage != "N/A" && OSImage != "N/A") {
         //fw & os one shot
         //this->DownloaderInterface.downloadfwos(c_str_FWDnX, c_str_FWImage,c_str_OSDnx,c_str_OSImage,c_str_GPFlagsOverride);
         this->ui->DownloadDetails->setText("Preparing for FW+OS download...");
@@ -757,7 +739,7 @@ void XfstkDldrPluginUserInterface::BeginDownload()
             return;
         }
     }
-    else if(OSDnX != "N/A" && OSImage != "N/A") {
+    else if(OSImage != "N/A") {
         //os only
         //this->DownloaderInterface.downloados(c_str_OSDnx,c_str_OSImage,c_str_GPFlagsOverride);
         bOsOnly = true;

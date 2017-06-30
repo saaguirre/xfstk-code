@@ -526,7 +526,7 @@ bool mrfdldrstate::IsGPPReset()
 
 bool mrfdldrstate::IsOsOnly()
 {
-    return (m_b_DnX_OS || (this->m_utils->FileSize(m_fname_fw_image) == 0));
+    return ((this->m_utils->FileSize(m_fname_fw_image) == 0));
 }
 
 bool mrfdldrstate::WriteOutPipe(unsigned char* pbuf, uint32 size)
@@ -1305,8 +1305,16 @@ void mrfdldrstate::Visit(MrfdFwHandleDXBL& )
         ret = FwDXBL();
     } else
     {
-        this->m_utils->u_log(LOG_OS, "OS: Sending DnX ...");
-        ret = OsDXBL();
+        if(m_mfld_os && !m_mfld_os->validDnX())
+        {
+            LogError(0xBADF00D,"No OS DnX Has Been Provided");
+            ret = false;
+        }
+        else
+        {
+            this->m_utils->u_log(LOG_OS, "OS: Sending DnX ...");
+            ret = OsDXBL();
+        }
     }
 
     EndlogTime();
@@ -1522,7 +1530,17 @@ void mrfdldrstate::Visit(MrfdFwHandleDCFI00& )
     if(IsFwState())
         fwdata = m_mfld_fw->GetFwImageData(FW_DATA_CHFI00);
     else if(IsOsState())
-        fwdata = m_mfld_os->GetChaabiDnX();
+    {
+        if(!m_mfld_os->validDnX())
+        {
+            LogError(0xBADF00D,"No OS DnX Has Been Provided");
+            ret_code = false;
+        }
+        else
+        {
+            fwdata = m_mfld_os->GetChaabiDnX();
+        }
+    }
     else
     {
         this->m_utils->u_log(LOG_STATUS, "Unable to determine downloader state ...");
@@ -1798,13 +1816,16 @@ void mrfdldrstate::Visit(MrfdOsHandleDORM& )
 #if 0
     gettimeofday(&m_start_time, NULL);
 #endif
-    if(m_b_DnX_OS && (strlen(m_fname_dnx_misc) > 0)) {
+    if(m_b_DnX_OS && (strlen(m_fname_dnx_misc) > 0))
+    {
         //Start Misc OS dowload state
         GotoState(DLDR_STATE_OS_MISC);
-    } else if((m_gpflags & 0x1) && (strlen(m_fname_dnx_os) > 0)){
+    } else if((m_gpflags & 0x1) && (strlen(m_fname_dnx_os) > 0))
+    {
         //Start normal OS dowload state
         GotoState(DLDR_STATE_OS_NORMAL);
-    } else {
+    } else
+    {
         this->m_utils->u_log(LOG_STATUS, "OS: Got DORM but OS recovery was not requested, booted into fw without fw dnx?");
         ret = false;
     }
@@ -2025,7 +2046,8 @@ void mrfdldrstate::Visit(MrfdStHandleFwMisc& )
 
     m_mfld_fw = new MerrifieldFW;
 
-    if(m_mfld_fw->Init(m_fname_dnx_fw, m_fname_fw_image,m_fname_bin_misc, csdbStatus , m_utils, m_gpflags, false,m_perform_emmc_dump) && !m_b_DnX_OS)
+    if(m_mfld_fw->Init(m_fname_dnx_fw, m_fname_fw_image,m_fname_bin_misc, csdbStatus\
+            , m_utils, m_gpflags, false,m_perform_emmc_dump))
     {
         //Send DnX FW size header data to target device
         //This will start the FW state machine
@@ -2033,7 +2055,7 @@ void mrfdldrstate::Visit(MrfdStHandleFwMisc& )
 
         ret = StartFw();
     }
-    else if(m_b_DnX_OS || (this->m_utils->FileSize(m_fname_dnx_misc) == 0) || (this->m_utils->FileSize(m_fname_fw_image) == 0))
+    else if((this->m_utils->FileSize(m_fname_dnx_misc) == 0) || (this->m_utils->FileSize(m_fname_fw_image) == 0))
     {
         ret = HandleNoSize();
         ret = true;
@@ -2067,7 +2089,8 @@ void mrfdldrstate::Visit(MrfdStHandleFwWipe& )
     //Set gpflags to do a FW cold reset
     temp_gpflags = m_gpflags | 0x2;
 
-    if(m_mfld_fw->Init(m_fname_dnx_fw, m_fname_fw_image,m_fname_bin_misc, csdbStatus , m_utils, temp_gpflags, true, m_perform_emmc_dump) && !m_b_DnX_OS)
+    if(m_mfld_fw->Init(m_fname_dnx_fw, m_fname_fw_image,m_fname_bin_misc,\
+            csdbStatus , m_utils, temp_gpflags, true, m_perform_emmc_dump))
     {
         //Send DnX FW size header data to target device
         //This will start the FW state machine
@@ -2075,7 +2098,7 @@ void mrfdldrstate::Visit(MrfdStHandleFwWipe& )
         ret = StartFw();
 
         m_ifwi_done = true;
-    } else if(m_b_DnX_OS || (this->m_utils->FileSize(m_fname_dnx_fw) == 0)) {
+    } else if((this->m_utils->FileSize(m_fname_dnx_fw) == 0)) {
         ret = HandleNoSize();// == BULK_ACK_HLT0)
         ret = true;
     }
@@ -2134,10 +2157,26 @@ void mrfdldrstate::Visit(MrfdStHandleOsNormal& )
             m_b_IDRQ = false;
             ret = Start();
         } else {
-            ret = StartOs();
+            if(m_mfld_os->validDnX())
+            {
+                 ret = StartOs();
+            }
+            else
+            {
+                ret = true;
+                this->m_utils->u_log(LOG_STATUS, "Warning: No DnX Provided");
+            }
         }
 #else
-        ret = StartOs();
+        if(m_mfld_os->validDnX())
+        {
+             ret = StartOs();
+        }
+        else
+        {
+            ret = true;
+            this->m_utils->u_log(LOG_STATUS, "Warning: No DnX Provided");
+        }
 #endif
     }
     else if(this->m_utils->FileSize(m_fname_dnx_os) == 0) {
@@ -2179,7 +2218,15 @@ void mrfdldrstate::Visit(MrfdStHandleOsMisc& )
         m_dldr_state = DLDR_STATE_OS_MISC;
         this->m_utils->u_log(LOG_STATUS, "POS(LPDDR) download is in progress ... ");
 
-        ret = StartOs();
+        if(m_mfld_os->validDnX())
+        {
+             ret = StartOs();
+        }
+        else
+        {
+            ret = true;
+            this->m_utils->u_log(LOG_STATUS, "Warning: No DnX Provided");
+        }
     }
     else if(this->m_utils->FileSize(m_fname_dnx_os) == 0) {
         dnx_data* fwdata = m_mfld_os->GetNoSizeData();
@@ -2392,7 +2439,8 @@ bool mrfdldrstate::Start()
     {
         m_mfld_fw = new MerrifieldFW;
 
-        if(m_mfld_fw->Init(m_fname_dnx_misc, m_fname_fw_image,m_fname_bin_misc, csdbStatus , m_utils, m_gpflags, false, m_perform_emmc_dump) && !m_b_DnX_OS)
+        if(m_mfld_fw->Init(m_fname_dnx_misc, m_fname_fw_image,m_fname_bin_misc, \
+                    csdbStatus , m_utils, m_gpflags, false, m_perform_emmc_dump))
         {
             GotoState(BULK_ACK_DCSDB);
             return true;
