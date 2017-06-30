@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2014  Intel Corporation
+    Copyright (C) 2015  Intel Corporation
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -28,6 +28,7 @@ public:
     virtual void PrintAllOptions() = 0;
     virtual bool IsActionRequired() = 0;
     virtual DeviceTransportType GetTransportType() = 0;
+    virtual int GetReadWriteTimeout() = 0;
 };
 
 #endif // IOPTIONS_H

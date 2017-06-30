@@ -22,31 +22,31 @@ GET_PROPERTY(api_file_location TARGET xfstk-dldr-api PROPERTY LOCATION)
 add_custom_target(SDK ALL DEPENDS xfstk-dldr-api)
 
 add_custom_command(TARGET SDK
-  COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/SDK
-  COMMAND ${CMAKE_COMMAND} -E copy ${api_file_location} ${CMAKE_BINARY_DIR}/SDK  #copy the shared library
-  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/xfstk-sources/api/downloader-api/xfstk-dldr-api_global.h ${CMAKE_BINARY_DIR}/SDK
-  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/xfstk-sources/api/downloader-api/xfstkdldrapi.h ${CMAKE_BINARY_DIR}/SDK
+  COMMAND ${CMAKE_COMMAND} -E make_directory '${CMAKE_BINARY_DIR}/SDK'
+  COMMAND ${CMAKE_COMMAND} -E copy '${api_file_location}' '${CMAKE_BINARY_DIR}/SDK'  #copy the shared library
+  COMMAND ${CMAKE_COMMAND} -E copy '${CMAKE_SOURCE_DIR}/xfstk-sources/api/downloader-api/xfstk-dldr-api_global.h' '${CMAKE_BINARY_DIR}/SDK'
+  COMMAND ${CMAKE_COMMAND} -E copy '${CMAKE_SOURCE_DIR}/xfstk-sources/api/downloader-api/xfstkdldrapi.h' '${CMAKE_BINARY_DIR}/SDK'
 
   # Populate sdk/xfstk-dldr-example-parallel
-  COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/SDK/xfstk-dldr-example-parallel
-  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/xfstk-sources/api/SDK/xfstk-dldr-example-parallel/xfstk-dldr-api-test.pro ${CMAKE_BINARY_DIR}/SDK/xfstk-dldr-example-parallel
-  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/xfstk-sources/api/SDK/xfstk-dldr-example-parallel/xfstk-dldr-example-parallel.h ${CMAKE_BINARY_DIR}/SDK/xfstk-dldr-example-parallel
-  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/xfstk-sources/api/SDK/xfstk-dldr-example-parallel/xfstk-dldr-example-parallel.cpp ${CMAKE_BINARY_DIR}/SDK/xfstk-dldr-example-parallel
+  COMMAND ${CMAKE_COMMAND} -E make_directory '${CMAKE_BINARY_DIR}/SDK/xfstk-dldr-example-parallel'
+  COMMAND ${CMAKE_COMMAND} -E copy '${CMAKE_SOURCE_DIR}/xfstk-sources/api/SDK/xfstk-dldr-example-parallel/xfstk-dldr-api-test.pro' '${CMAKE_BINARY_DIR}/SDK/xfstk-dldr-example-parallel'
+  COMMAND ${CMAKE_COMMAND} -E copy '${CMAKE_SOURCE_DIR}/xfstk-sources/api/SDK/xfstk-dldr-example-parallel/xfstk-dldr-example-parallel.h' '${CMAKE_BINARY_DIR}/SDK/xfstk-dldr-example-parallel'
+  COMMAND ${CMAKE_COMMAND} -E copy '${CMAKE_SOURCE_DIR}/xfstk-sources/api/SDK/xfstk-dldr-example-parallel/xfstk-dldr-example-parallel.cpp' '${CMAKE_BINARY_DIR}/SDK/xfstk-dldr-example-parallel'
 
   # Populate sdk/xfstk-dldr-example-serial
-  COMMAND ${CMAKE_COMMAND} -E make_directory  ${CMAKE_BINARY_DIR}/SDK/xfstk-dldr-example-serial 
-  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/xfstk-sources/api/SDK/xfstk-dldr-example-serial/xfstk-dldr-api-test.pro ${CMAKE_BINARY_DIR}/SDK/xfstk-dldr-example-serial
-  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/xfstk-sources/api/SDK/xfstk-dldr-example-serial/xfstk-dldr-example-serial.cpp ${CMAKE_BINARY_DIR}/SDK/xfstk-dldr-example-serial
+  COMMAND ${CMAKE_COMMAND} -E make_directory  '${CMAKE_BINARY_DIR}/SDK/xfstk-dldr-example-serial'
+  COMMAND ${CMAKE_COMMAND} -E copy '${CMAKE_SOURCE_DIR}/xfstk-sources/api/SDK/xfstk-dldr-example-serial/xfstk-dldr-api-test.pro' '${CMAKE_BINARY_DIR}/SDK/xfstk-dldr-example-serial'
+  COMMAND ${CMAKE_COMMAND} -E copy '${CMAKE_SOURCE_DIR}/xfstk-sources/api/SDK/xfstk-dldr-example-serial/xfstk-dldr-example-serial.cpp' '${CMAKE_BINARY_DIR}/SDK/xfstk-dldr-example-serial'
 
   # Populate sdk/xfstk-dldr-example-parallel-dynamic-load
-  COMMAND ${CMAKE_COMMAND} -E make_directory  ${CMAKE_BINARY_DIR}/SDK/xfstk-dldr-example-parallel-dynamic-load
-  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/xfstk-sources/api/SDK/xfstk-dldr-example-parallel-dynamic-load/xfstk-dldr-api-test.pro
-    ${CMAKE_BINARY_DIR}/SDK/xfstk-dldr-example-parallel-dynamic-load
-  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/xfstk-sources/api/SDK/xfstk-dldr-example-parallel-dynamic-load/xfstk-dldr-example-parallel.h
-    ${CMAKE_BINARY_DIR}/SDK/xfstk-dldr-example-parallel-dynamic-load
-  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/xfstk-sources/api/SDK/xfstk-dldr-example-parallel-dynamic-load/xfstk-dldr-example-parallel.cpp
-    ${CMAKE_BINARY_DIR}/SDK/xfstk-dldr-example-parallel-dynamic-load
+  COMMAND ${CMAKE_COMMAND} -E make_directory  '${CMAKE_BINARY_DIR}/SDK/xfstk-dldr-example-parallel-dynamic-load'
+  COMMAND ${CMAKE_COMMAND} -E copy '${CMAKE_SOURCE_DIR}/xfstk-sources/api/SDK/xfstk-dldr-example-parallel-dynamic-load/xfstk-dldr-api-test.pro'
+    '${CMAKE_BINARY_DIR}/SDK/xfstk-dldr-example-parallel-dynamic-load'
+  COMMAND ${CMAKE_COMMAND} -E copy '${CMAKE_SOURCE_DIR}/xfstk-sources/api/SDK/xfstk-dldr-example-parallel-dynamic-load/xfstk-dldr-example-parallel.h'
+    '${CMAKE_BINARY_DIR}/SDK/xfstk-dldr-example-parallel-dynamic-load'
+  COMMAND ${CMAKE_COMMAND} -E copy '${CMAKE_SOURCE_DIR}/xfstk-sources/api/SDK/xfstk-dldr-example-parallel-dynamic-load/xfstk-dldr-example-parallel.cpp'
+    '${CMAKE_BINARY_DIR}/SDK/xfstk-dldr-example-parallel-dynamic-load'
 
   # Tar it up  
-  COMMAND ${CMAKE_COMMAND} -E tar czf xfstk-sdk-x86_64.tar.gz  ${CMAKE_BINARY_DIR}/SDK)
+  COMMAND ${CMAKE_COMMAND} -E tar czf xfstk-sdk-x86_64.tar.gz  '${CMAKE_BINARY_DIR}/SDK')
 

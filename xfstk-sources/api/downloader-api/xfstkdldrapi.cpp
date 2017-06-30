@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2014  Intel Corporation
+    Copyright (C) 2015  Intel Corporation
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
     License as published by the Free Software Foundation; either
@@ -350,7 +350,7 @@ bool xfstkdldrapi::hashverify(char *hashfile, bool write)
     this->releaseinterface();
     return true;
 }
-void xfstkdldrapi::setcsdbResponsebuffer(unsigned char *responseBuffer, int maxsize)
+void xfstkdldrapi::setResponsebuffer(unsigned char *responseBuffer, int& maxsize)
 {
     xfstkdldrfactory* xfstkfactoryinterface = (xfstkdldrfactory*)xfstkfactoryhandle;
     xfstkfactoryinterface->SetIdrqResponse(responseBuffer,maxsize);
@@ -468,6 +468,7 @@ bool xfstkdldrapi::downloadcli(const char *cli)
     char* tmpargv[MAX_ARGS];
     xfstksleep sleeper;
     boost::scoped_array<char> message (new char[1024]);
+    boost::scoped_array<char> arguments[MAX_ARGS];
     xfstkdldrfactory* xfstkfactoryinterface = (xfstkdldrfactory*)xfstkfactoryhandle;
     this->showversion();
     if(!this->interfaceavailable())
@@ -494,35 +495,49 @@ bool xfstkdldrapi::downloadcli(const char *cli)
         devicedetected++;
         sleeper.sleep(1);
     }
+
+    //set the first argument
+    arguments[0].reset(new char[1024]);
+    strcpy(arguments[0].get(),"xfstk-dldr-api");
     QString cliQstr(cli);
-    QStringList args = cliQstr.split("--");
-    tmpargc = args.size();
-    int j = 0;
-    for(int i = 0 ; i<tmpargc && j<MAX_ARGS; ++i)
+    //split the cli string by the -- argument prefix
+    QStringList args = cliQstr.split("--",QString::SkipEmptyParts);
+    int j = 1;
+    foreach(QString arg, args)
     {
-        QString localStr = args.at(i);
-        //the first arg 'cli::' is not needed
-        localStr.prepend("--");
-        QStringList splitz = localStr.trimmed().split(" ");
-        foreach(QString strz,splitz)
+        //for each argument add the -- prefix
+        arg.prepend("--");
+        //Then split the argument by the first space
+        //this yeilds the option (e.g. --fwdnx
+        QString option = arg.section(' ',0,0);
+        //and the parameter for that option (e.g. fwdnx test.bin)
+        QString parameter = arg.section(' ',1);
+
+        //copy option value into buffer
+        arguments[j].reset(new char[option.length() +1]);
+        strcpy(arguments[j].get(),option.trimmed().toStdString().c_str());
+        j++;
+
+        //if there is a parameter (note: options like --verbose have no parameters)
+        //copy it into a buffer
+        if(parameter.size() > 0)
         {
-            tmpargv[j] = new char[strz.size() + 1];
-            memset(tmpargv[j],0,strz.size() + 1);
-            strcpy(tmpargv[j],strz.trimmed().toStdString().c_str());
+            arguments[j].reset(new char[parameter.length() + 1]);
+            strcpy(arguments[j].get(),parameter.trimmed().toStdString().c_str());
             j++;
         }
     }
+    //set the real argument count
     tmpargc = j;
+    //assign the argument buffers
+    //note since buffers are scope buffers no deletes are needed
+    for(int i = 0; i < tmpargc; i++)
+    {
+        tmpargv[i] = arguments[i].get();
+    }
     //Parse the options from the user
     bool retval = xfstkfactoryinterface->SetOptions(tmpargc,tmpargv);
-    for(int i = 0; i < tmpargc; ++i)
-    {
-        if(tmpargv[i])
-        {
-            delete [] tmpargv[i];
-            tmpargv[i] = NULL;
-        }
-    }
+
     if(!retval) {
         printf("XFSTK: Download options could not be parsed correctly.\n");
         printf("XFSTK: Please connect only a single SoC device and cycle device power.\n");
@@ -1269,7 +1284,7 @@ void xfstkdldrapi::showversion(void)
 {
     char* message = new char[256];
     memset(message,0,256);
-    sprintf(message,"\nXFSTK Downloader API %s \nCopyright (c) 2014 Intel Corporation\n", DOWNLOADER_VERSION);
+    sprintf(message,"\nXFSTK Downloader API %s \nCopyright (c) 2015 Intel Corporation\n", DOWNLOADER_VERSION);
     xfstklogmessage(message,this->physclientdata);
     delete[] message;
 }

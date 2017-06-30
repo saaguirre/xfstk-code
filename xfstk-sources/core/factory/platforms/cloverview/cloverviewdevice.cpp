@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2014  Intel Corporation
+    Copyright (C) 2015  Intel Corporation
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -208,6 +208,7 @@ CloverviewUSB20Device::CloverviewUSB20Device()
     this->libutils = NULL;
     this->id_product = CLOVERVIEW_PRODUCT_ID;
     this->id_vendor = INTEL_VENDOR_ID;
+    USBTIMEOUT = 5000;
     if(!IntelSoCGlobalDeviceCurrentState.IsUsb20Initialized) {
         usb_init();
         IntelSoCGlobalDeviceCurrentState.IsUsb20Initialized = true;
@@ -561,7 +562,7 @@ bool CloverviewUSB20Device::Write(void *pBuffer, unsigned int bufferSize)
     }
     for(ULONG i = 0; i < delay_time; i++){
         bytes_written = usb_bulk_write(dev_handle, out_pipe, reinterpret_cast<char*>(pBuffer),
-                                      bufferSize, CloverviewUSB20Device::USBTIMEOUT);
+                                      bufferSize, USBTIMEOUT);
         if(bytes_written < 0) {
             bytes_written = 0;
             return false;
@@ -597,7 +598,7 @@ bool CloverviewUSB20Device::Read(void *szBuff, unsigned int bufferSize)
     }
     for(ULONG i = 0; i < delay_time; i++){
         bytes_rxed = usb_bulk_read(dev_handle, in_pipe, reinterpret_cast<char*>(szBuff),
-                                  bufferSize, CloverviewUSB20Device::USBTIMEOUT);
+                                  bufferSize, USBTIMEOUT);
         if ((bytes_rxed) < 0) {
            this->libutils->u_log(LOG_USB, "usb_bulk_read() fails");
            RetVal = false;
@@ -637,7 +638,7 @@ bool CloverviewUSB20Device::GetAck(void *szBuff, unsigned int *bytes_rxed)
     }
     for(ULONG i = 0; i < delay_time; i++){
         *bytes_rxed = usb_bulk_read(dev_handle, in_pipe, reinterpret_cast<char*>(szBuff),
-                                  512, CloverviewUSB20Device::USBTIMEOUT);
+                                  512, USBTIMEOUT);
         if ((*bytes_rxed) <= 0) {
            this->libutils->u_log(LOG_USB, "usb_bulk_read() fails");
            RetVal = false;

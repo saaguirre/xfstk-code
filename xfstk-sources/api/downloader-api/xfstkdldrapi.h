@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2014  Intel Corporation
+    Copyright (C) 2015  Intel Corporation
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -123,6 +123,7 @@ REM
 */
 class XFSTKDLDRAPISHARED_EXPORT xfstkdldrapi {
 public:
+
     /*! \brief Constructs a new xfstkdldrapi instance.
      *  \param None
      *  \return a pointer to a physical instance of xfstkdldrapi.
@@ -130,6 +131,7 @@ public:
      *  \note None
      */
     xfstkdldrapi();
+
     /*! \brief Distructs a xfstkdldrapi instance.
      *  \param None
      *  \return a pointer to a physical instance of xfstkdldrapi.
@@ -138,8 +140,8 @@ public:
      */
     virtual ~xfstkdldrapi();
 	
-	
-    /*! \brief Allows for the retrieval of the IDRQ response from a device
+    /*! DEPRECATED: Use setResponsebuffer & downloadercli methods
+     * \brief Allows for the retrieval of the IDRQ response from a device
      *  \param buffer is the where the IDRQ response will be stored
      *  \param maxsize is the maximum space allocated for buffer
      *  \return TRUE if operation was a success or else FALSE
@@ -171,16 +173,18 @@ public:
      */
     virtual bool hashverify(char *hashfile, bool write);
 
-    /*! \brief Set the response buffer for the CSDB provisioning
+    /*! \brief Set the response buffer for downloader operations
      *  \param responseBuffer buffer to be used
      *  \param maxsize the maximum size of the buffer
      *  \return none
      *  \exception
-     *  \note Call this before running the downloadcsdb() function
+     *  \note Call this before running the operations that elicit a response from the device
+     *  \note The maxsize input variable will be updated with the buffer size retrieved from the device
      */
-    virtual void setcsdbResponsebuffer(unsigned char* responseBuffer, int maxsize);
+    virtual void setResponsebuffer(unsigned char* responseBuffer, int& maxsize);
 
-    /*! \brief Performs single shot firmware and operating system download.
+    /*! DEPRECATED: Use setResponsebuffer & downloadercli methods
+     *  \brief download csdb payloads
      *  \param fwdnx Firmware download and execute (DnX) module.
      *  \param miscbin CSDB Payload file
      *  \param cmdcode CSDB command code
@@ -191,6 +195,7 @@ public:
      *  \note It is recommended to use the downloadcli() method for CSDB instead
      */
     virtual bool downloadcsdb(char *fwdnx, char *miscbin, char *cmdcode,char *fwimage, bool direct );
+
     /*! \brief Performs single shot firmware only download.
      *  \param fwdnx Firmware download and execute (DnX) module.
      *  \param fwimage Firmware binary image.
@@ -234,7 +239,6 @@ public:
      *  \exception None
      *  \note gpflags can be set to other values.  Please contact your Intel representative for additional details.
      */
-
     virtual bool downloadfwos(char *fwdnx, char *fwimage, char *osdnx, char* osimage, char* gpflags, char* softfuse);
 
     /*! \brief Performs parallel multitarget firmware and operating system download in async mode, it will return after the download to the device is done.
@@ -249,7 +253,6 @@ public:
      *  \note gpflags can be set to other values.  Please contact your Intel representative for additional details.  When programming multiple targets 1 thread will be spawned per target if possible.
      *  \note **** The client app will need to detect the device and use the detected USBSN to start a thread to call this API, prefered method for MFG tools.
      */
-
     virtual bool downloadmtfwosasync(char *fwdnx, char *fwimage, char *osdnx, char* osimage, char* gpflags, char* usbsn);
 
     /*! \brief Performs parallel multitarget firmware and operating system download in async mode, it will return after the download to the device is done.
@@ -265,7 +268,6 @@ public:
      *  \note gpflags can be set to other values.  Please contact your Intel representative for additional details.  When programming multiple targets 1 thread will be spawned per target if possible.
      *  \note **** The client app will need to detect the device and use the detected USBSN to start a thread to call this API, prefered method for MFG tools.
      */
-
     virtual bool downloadmtfwosasync(char *fwdnx, char *fwimage, char *osdnx, char* osimage, char* gpflags, char* usbsn, char* softfuse);
 
     /*! \brief Registers a callback with the xfstk api in order to obtain download status information.
@@ -301,7 +303,6 @@ public:
      */
     virtual void setsoftfusepath(bool include, char * softfuse);
 
-
     /*! \brief Sets the files path for miscdnx, this one is only for advanced feature in TNG USB 3.0 POC.
      *  \param  type - bool  - enable/disable miscdnx.
      *  \param  type - char *   - string path for miscdnx file.
@@ -318,6 +319,7 @@ public:
      *  \note Visibility of targets is dependent on your firmware configuration.  If you are having a problem detecting targets please contact your Intel representative for assistance.
      */
     virtual int getavailabletargets();
+
     /*! \brief Reports the number of available targets connected to the host system for devicetype.
      *  \param None
      *  \return Integer value representing the number of conencted targets
@@ -333,6 +335,7 @@ public:
      *  \note The data from socdevices can be used by Client Apps to display the port info and usbsn based the physical port.
      */
     virtual int getavailabletargets(SoCDevices * socdevices);
+
 #ifdef XFSTK_OS_WIN
     /*! \brief Register callback functions for device attach and detach events.
      *  \param socdevices An array of the socdevice port mapping data for detected devices
@@ -344,7 +347,6 @@ public:
      *  \note
      */
     virtual bool registerdevicecallback(DevicesCallBack* callBackStruct, unsigned long ProductId=0);
-
 #endif
 
     /*! \brief Lock the usb device mutex, only call this before scanning the device for USBSN.
@@ -354,6 +356,7 @@ public:
      *  \note Since libusb driver is not multi thread safe during USB device enumeration, we added this lock for thread safty.
      */
     virtual void usbdevicemutexlock();
+
     /*! \brief Unlock the usb device mutex, call this after a UBS device is found and before call downloadmtfwosasync().
      *  \param None
      *  \return None
@@ -362,6 +365,7 @@ public:
      *  \     It will block the API if it is in lock status before call the API.
      */
     virtual void usbdevicemutexunlock();
+
     /*! \brief Get the XFSTK API version string.
      *  \param char*, client should allocate memory for this version string, should be at least 8 byte long.
      *  \return None
@@ -369,6 +373,7 @@ public:
      *  \note
      */
     virtual void getversion(char* version);
+
     /*! \brief Get the XFSTK API version string.
      *  \param
      *  \return std::string
@@ -384,6 +389,7 @@ public:
      *  \note
      */
     virtual bool getlasterror(LastError* er);
+
     /*! \brief Set the delay time for before each USB bulk read/write in miliseconds.
      *  \param unsigned long delayms.
      *  \return true/false
@@ -402,9 +408,6 @@ public:
      *  \note
      */
     virtual void setwipeifwi(bool enable);
-
-
-
 
 private:
     xfstkstatuspfn physstatuspfn;

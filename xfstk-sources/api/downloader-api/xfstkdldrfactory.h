@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2014  Intel Corporation
+    Copyright (C) 2015  Intel Corporation
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -80,7 +80,7 @@ public:
     bool ExecuteDownloadSingleAsync(char *fwdnx, char *fwimage, char *osdnx, char* osimage, char* gpflags, char* usbsn, char* softfuse, int retrycount);
     bool SetStatusCallback(XfstkStatusPfn StatusCallback, void* clientdata);
     void SetTransportType(DeviceTransportType transporttype);
-    void SetIdrqResponse(unsigned char *buffer, int maxsize);
+    void SetIdrqResponse(unsigned char *buffer, int& maxsize);
     ~xfstkdldrfactory();
     xfstksleep sleeper;
     boost::scoped_array<char> miscdnx;
@@ -94,8 +94,9 @@ public:
     DeviceTransportType transporttype;
 	unsigned long scudevicetype;
     unsigned long expandedOptions;
-    int idrqBuffSize;
-    boost::scoped_array<unsigned char> idrqBuffer;
+    int* idrqBuffSize;
+    int maxIdrqBuffSize;
+    unsigned char* idrqBuffer;
 
 
 

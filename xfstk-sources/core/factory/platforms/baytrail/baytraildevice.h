@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2014  Intel Corporation
+    Copyright (C) 2015  Intel Corporation
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -62,6 +62,7 @@ public:
     bool IsCorrectProtocol(void *szBuff, unsigned int *bytes_rxed);
     bool SetUtilityInstance(void *UtilityInstance);
     bool IsSupportedDevice(unsigned short vendorid, unsigned short productid);
+    int SetUsbTimeoutDelay(int timeoutMS){ return timeoutMS; }
 private:
     last_error m_last_error;
     IDevice *PhysicalTransportDevice;

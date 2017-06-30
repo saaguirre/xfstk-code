@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2014  Intel Corporation
+    Copyright (C) 2015  Intel Corporation
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -67,6 +67,7 @@ public:
     unsigned int GetTarget();
     unsigned int GetDebugLevel();
     unsigned int GetUsbdelayms();
+    int GetReadWriteTimeout() {return 0;}
     bool GetUmipdumpValue();
     const char* GetQuery();
     bool IsQuery();

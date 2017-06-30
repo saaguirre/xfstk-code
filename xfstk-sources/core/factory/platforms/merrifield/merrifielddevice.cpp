@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2014  Intel Corporation
+    Copyright (C) 2015  Intel Corporation
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -221,6 +221,7 @@ MerrifieldUSB20Device::MerrifieldUSB20Device(unsigned long device)
     this->numinits = 0;
     this->reqnuminits = 1;
     this->libutils = NULL;
+    USBTIMEOUT = 5000;
     if(device == MOOREFIELD_DEVICE_ID)
         this->id_product = MOOREFIELD_PRODUCT_ID;
     else if(device == MERRIFIELD_DEVICE_ID)
@@ -580,7 +581,7 @@ bool MerrifieldUSB20Device::Write(void *pBuffer, unsigned int bufferSize)
     }
     for(ULONG i = 0; i < delay_time; i++){
         bytes_written = usb_bulk_write(dev_handle, out_pipe, reinterpret_cast<char*>(pBuffer),
-                                      bufferSize, MerrifieldUSB20Device::USBTIMEOUT);
+                                      bufferSize, USBTIMEOUT);
         if(bytes_written < 0) {
             bytes_written = 0;
             return false;
@@ -616,7 +617,7 @@ bool MerrifieldUSB20Device::Read(void *szBuff, unsigned int bufferSize)
     }
     for(ULONG i = 0; i < delay_time; i++){
         bytes_rxed = usb_bulk_read(dev_handle, in_pipe, reinterpret_cast<char*>(szBuff),
-                                  bufferSize, MerrifieldUSB20Device::USBTIMEOUT);
+                                  bufferSize, USBTIMEOUT);
         if ((bytes_rxed) < 0) {
            this->libutils->u_log(LOG_USB, "usb_bulk_read() fails");
            RetVal = false;
@@ -656,7 +657,7 @@ bool MerrifieldUSB20Device::GetAck(void *szBuff, unsigned int *bytes_rxed)
     }
     for(ULONG i = 0; i < delay_time; i++){
         *bytes_rxed = usb_bulk_read(dev_handle, in_pipe, reinterpret_cast<char*>(szBuff),
-                                  512, MerrifieldUSB20Device::USBTIMEOUT);
+                                  512, USBTIMEOUT);
         if ((*bytes_rxed) <= 0) {
            this->libutils->u_log(LOG_USB, "usb_bulk_read() fails");
            RetVal = false;
@@ -758,6 +759,7 @@ MerrifieldUSB30Device::MerrifieldUSB30Device(unsigned long device)
     this->numinits = 0;
     this->reqnuminits = 1;
     this->libutils = NULL;
+    USBTIMEOUT = 5000;
     if(device == MOOREFIELD_DEVICE_ID)
         this->id_product = MOOREFIELD_PRODUCT_ID;
     else if(device == MERRIFIELD_DEVICE_ID)
@@ -1119,7 +1121,7 @@ bool MerrifieldUSB30Device::Write(void *pBuffer, unsigned int bufferSize)
     }
     for(ULONG i = 0; i < delay_time; i++){
         error = libusb_bulk_transfer(dev_handle, out_pipe, reinterpret_cast<unsigned char*>(pBuffer),
-                                      bufferSize, &bytes_written,MerrifieldUSB30Device::USBTIMEOUT);
+                                      bufferSize, &bytes_written,USBTIMEOUT);
         if(bytes_written < 0) {
             bytes_written = 0;
             return false;
@@ -1156,7 +1158,7 @@ bool MerrifieldUSB30Device::Read(void *szBuff, unsigned int bufferSize)
     }
     for(ULONG i = 0; i < delay_time; i++){
         error = libusb_bulk_transfer(dev_handle, in_pipe, reinterpret_cast<unsigned char*>(szBuff),
-                                      bufferSize, &bytes_rxed, MerrifieldUSB30Device::USBTIMEOUT);
+                                      bufferSize, &bytes_rxed, USBTIMEOUT);
         if ((bytes_rxed) < 0) {
            this->libutils->u_log(LOG_USB, "usb_bulk_read() fails");
            RetVal = false;
@@ -1197,7 +1199,7 @@ bool MerrifieldUSB30Device::GetAck(void *szBuff, unsigned int *bytes_rxed)
     }
     for(ULONG i = 0; i < delay_time; i++){
         error = libusb_bulk_transfer(dev_handle, in_pipe, reinterpret_cast<unsigned char*>(szBuff),
-                                     512, reinterpret_cast<int*>(bytes_rxed), MerrifieldUSB30Device::USBTIMEOUT);
+                                     512, reinterpret_cast<int*>(bytes_rxed), USBTIMEOUT);
         if ((*bytes_rxed) < 0) {
            this->libutils->u_log(LOG_USB, "usb_bulk_read() fails");
            RetVal = false;

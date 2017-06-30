@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2014  Intel Corporation
+    Copyright (C) 2015  Intel Corporation
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -34,6 +34,7 @@
 #include <fstream>
 #include <QTime>
 #include <string>
+#include <QtEndian>
 
 #define USB_READ_WRITE_DELAY_MS 0
 
@@ -1444,7 +1445,7 @@ void mrfdldrstate::Visit(MrfdFwHandleUCSDB& )
         memcpy(&csdb_size,buffer.get() + CSDB_SIZE_OFFSET , sizeof(DWORD));
 
         //if there is a payload, dump to file
-        if(csdb_size && (csdb_size - CSDB_HEADER_SIZE) > 0)
+        if(csdb_size && (csdb_size - CSDB_RETURN_HEADER_SIZE) > 0)
         {
             QString curTime = QDateTime::currentDateTime().toString()\
                     .replace(":","_").replace(" ","_");
@@ -1749,9 +1750,10 @@ void mrfdldrstate::Visit(MrfdFwHandleCLVT& )
 void mrfdldrstate::Visit(MrfdFwHandleRTBD& )
 {
     int ret_code = 0;
-    struct bati_battery_data batt_data;
+    bati_battery_data batt_data;
+    memset(&batt_data,0,sizeof(batt_data));
     uint32 bati_data_size = 0;
-    BYTE sBuff[17] = {0};
+    PUCHAR sBuff = reinterpret_cast<PUCHAR>(&batt_data);
     ULONG preamble_msg = 0;
 
     try {
@@ -1772,7 +1774,6 @@ void mrfdldrstate::Visit(MrfdFwHandleRTBD& )
         }
         else
         {
-
             //First to check if it's HLT0 ack, if not then it should be the data size of BATI
             bati_data_size = (sBuff [0] <<24 ) + (sBuff [1] <<16) + (sBuff [2] << 8) + sBuff[3];
             if(bati_data_size == BULK_ACK_HLT0)
@@ -1797,30 +1798,24 @@ void mrfdldrstate::Visit(MrfdFwHandleRTBD& )
         {
             throw 6;
         }
-
-        batt_data.BATI = (sBuff [0] <<24 ) + (sBuff [1] <<16) + (sBuff [2] << 8) + sBuff[3];
-        batt_data.header_size = (sBuff [5] << 8) + sBuff[4];
-        batt_data.header_revis = sBuff[6];
-        batt_data.xor_check = sBuff[7];
-        batt_data.voltage = sBuff[8];
-        batt_data.coulomb_count = sBuff[9];
-
+        batt_data.BATI = qFromBigEndian((qint32)batt_data.BATI);
         if(batt_data.BATI != BATI_SIGNATURE)
         {
-            this->m_utils->u_log(LOG_FWUPGRADE, "BATI:%x: Battery voltage: 0x%x(%fV)", batt_data.BATI,batt_data.voltage, 4*4.692*batt_data.voltage);
+            this->m_utils->u_log(LOG_FWUPGRADE, "BATI:%x: Battery voltage: 0x%x", batt_data.BATI,batt_data.voltage);
             throw runtime_error("Error: Unexpected Battery signature");
         }
 
-        //printf("\n\n***********Battery Data***************\n0x%x BATI in hex \n0x%x Header Size \n0x%x Header Revision \n0x%x XOR Checksum \n0x%x Battery Voltage \n0x%x Battery Coulomb Counter\n***********Battery Data***************\n\n",BattData.BATI,BattData.HeaderSize,BattData.HeaderRevis,BattData.XorCheck,BattData.voltage,BattData.coulombCount);
         this->m_utils->u_log(LOG_STATUS, "BATI: Battery power is too low, charging up ...");
-        this->m_utils->u_log(LOG_STATUS, "BATI:%x: Battery voltage: 0x%x(%fV) The threshold: 0x%x(%fV)", batt_data.BATI,batt_data.voltage, 4*4.692*batt_data.voltage, 0xbf, 3.585);
+        this->m_utils->u_log(LOG_STATUS, "BATI:%x: Battery voltage: 0x%x", batt_data.BATI,batt_data.voltage);
     }//try
 
     catch( int errorcode ) {
         ret_code = errorcode;
         this->m_utils->u_log(LOG_FWUPGRADE,"%s Exception raised: ErrorCode %d", __FUNCTION__, errorcode);
         LogError(errorcode);
-        this->m_utils->u_log(LOG_STATUS, "Battery power is okay, continue FW download ...");
+        //only print this if error code is 0
+        if(!errorcode)
+            this->m_utils->u_log(LOG_STATUS, "Battery power is okay, continue FW download ...");
     }
     catch(std::exception & e)
     {

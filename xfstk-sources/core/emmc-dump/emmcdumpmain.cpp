@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2014  Intel Corporation
+    Copyright (C) 2015  Intel Corporation
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -28,7 +28,7 @@
 
 void show_version(void)
 {
-    printf("\neMMC Dump %s \nCopyright (c) 2014 Intel Corporation\n", EMMC_DUMP_VERSION);
+    printf("\neMMC Dump %s \nCopyright (c) 2015 Intel Corporation\n", EMMC_DUMP_VERSION);
 }
 
 void status(char *message, void *)

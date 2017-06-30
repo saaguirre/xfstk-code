@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2014  Intel Corporation
+    Copyright (C) 2015  Intel Corporation
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -27,7 +27,7 @@
 
 void show_version(void)
 {
-    printf("\nXFSTK Downloader Solo %s \nCopyright (c) 2014 Intel Corporation\n", DOWNLOADER_VERSION);
+    printf("\nXFSTK Downloader Solo %s \nCopyright (c) 2015 Intel Corporation\n", DOWNLOADER_VERSION);
     printf("Build date and time: %s %s\n\n", __DATE__, __TIME__);
 }
 

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2014  Intel Corporation
+    Copyright (C) 2015  Intel Corporation
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -226,7 +226,7 @@ bool MerrifieldOS::InitOsImage()
             throw 8;
 
 
-        this->m_utils->u_log(LOG_OS, "_num OS Images : %d ", num_os_images);
+        this->m_utils->u_log(LOG_OS, "_num OS Images : %lu ", num_os_images);
 
         // now walk this and get all os data sizes
         for(i = 0; i < num_os_images; i++){
@@ -236,7 +236,7 @@ bool MerrifieldOS::InitOsImage()
             if(!retval)
             {
                 size_t result;
-                result = fread(&temp_data, sizeof(unsigned long), 1, m_fp_os_image);
+                result = fread(&temp_data, sizeof(unsigned int), 1, m_fp_os_image);
 
                 this->m_utils->u_log(LOG_OS, "_temp_data : %x", temp_data);
                 //Error case
@@ -248,7 +248,7 @@ bool MerrifieldOS::InitOsImage()
                 {
                     //Calculate OS Data Size
                     m_os_data_size += (temp_data * size_of_512); // in 512 bytes
-                    this->m_utils->u_log(LOG_OS, "OSII: %d Data Size: %d", i, m_os_data_size);
+                    this->m_utils->u_log(LOG_OS, "OSII: %d Data Size: %llu", i, m_os_data_size);
                     this->m_utils->u_log(LOG_OS, "_Temp Data is: %x h ", temp_data);
 
                     temp_data = 0;
@@ -295,7 +295,7 @@ unsigned long MerrifieldOS::GetFileSize(char* file)
         fclose(fp_file);
     }
 
-    this->m_utils->u_log(LOG_OS, "fileName: %s FileSize : %d ", file, lSize);
+    this->m_utils->u_log(LOG_OS, "fileName: %s FileSize : %lu ", file, lSize);
     return lSize;
 }
 
@@ -352,14 +352,14 @@ dnx_data* MerrifieldOS::GetOsImageDataChunk()
             throw 12;
 
         // sanity 2
-        this->m_utils->u_log(LOG_OS, "RIMGChunkSize is : %d", this->m_utils->RIMGChunkSize);
-        this->m_utils->u_log(LOG_OS, "OS Data Size is : %d", m_os_data_size);
+        this->m_utils->u_log(LOG_OS, "RIMGChunkSize is : %lu", this->m_utils->RIMGChunkSize);
+        this->m_utils->u_log(LOG_OS, "OS Data Size is : %llu", m_os_data_size);
         if(m_os_data_size < this->m_utils->RIMGChunkSize * size_of_512)
-            this->m_utils->u_log(LOG_OS, "OS Data Size:%d < chunk size: %d", m_os_data_size, this->m_utils->RIMGChunkSize * size_of_512);
+            this->m_utils->u_log(LOG_OS, "OS Data Size : %llu < chunk size: %lu", m_os_data_size, this->m_utils->RIMGChunkSize * size_of_512);
 
 
         // allocate buffer for data  to send
-        this->m_utils->u_log(LOG_OS, "allocating buffer for data to send...data size: %d", this->m_utils->RIMGChunkSize * size_of_512);
+        this->m_utils->u_log(LOG_OS, "allocating buffer for data to send...data size: %lu", this->m_utils->RIMGChunkSize * size_of_512);
         m_pkt_buffer = new UCHAR[size_of_512 * this->m_utils->RIMGChunkSize];
         if(!m_pkt_buffer)
             throw 5;
@@ -370,14 +370,14 @@ dnx_data* MerrifieldOS::GetOsImageDataChunk()
         read_cnt = fread(m_pkt_buffer, sizeof(UCHAR), (unsigned long)this->m_utils->RIMGChunkSize * size_of_512, m_fp_os_image);
         // sanity
         if(read_cnt != this->m_utils->RIMGChunkSize * size_of_512)
-            this->m_utils->u_log(LOG_OS, "OS Data Size left:%d < chunk size: %d", read_cnt, this->m_utils->RIMGChunkSize * size_of_512);
+            this->m_utils->u_log(LOG_OS, "OS Data Size left:%lu < chunk size: %lu", read_cnt, this->m_utils->RIMGChunkSize * size_of_512);
 
 
-        this->m_utils->u_log(LOG_OS, "data size to read: %d", read_cnt);
+        this->m_utils->u_log(LOG_OS, "data size to read: %lu", read_cnt);
 
         // decrement data size from total os data
         m_os_data_size -= read_cnt;
-        this->m_utils->u_log(LOG_OS, "OS: Bytes left to send: %d", m_os_data_size);
+        this->m_utils->u_log(LOG_OS, "OS: Bytes left to send: %llu", m_os_data_size);
 
         m_osdata.size = this->m_utils->RIMGChunkSize * size_of_512;
         m_osdata.data = m_pkt_buffer;

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2014  Intel Corporation
+    Copyright (C) 2015  Intel Corporation
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -76,6 +76,8 @@ public:
     bool SetUtilityInstance(void *UtilityInstance);
     void GetUsbsn(char * usbsn);
     bool IsSupportedDevice(unsigned short vendorid, unsigned short productid);
+    int SetUsbTimeoutDelay(int timeoutMS)\
+    { return this->PhysicalTransportDevice->SetUsbTimeoutDelay(timeoutMS);}
     int serialComPort;
 
 private:
@@ -113,11 +115,12 @@ public:
     bool SetUtilityInstance(void *UtilityInstance);
     void GetUsbsn(char * usbsn);
     bool IsSupportedDevice(unsigned short vendorid, unsigned short productid);
+    int SetUsbTimeoutDelay(int timeoutMS){ USBTIMEOUT = timeoutMS; return USBTIMEOUT;}
 private:
     bool VerifyDeviceHandle(struct usb_device* Handle);
     void* CurrentDeviceHandle;
     MerrifieldUtils *libutils;
-    static const int USBTIMEOUT = 60000;
+    int USBTIMEOUT;
     struct usb_bus *bus;
     struct usb_device *dev;
     struct usb_device *dev_port;
@@ -158,11 +161,12 @@ public:
     bool SetUtilityInstance(void *UtilityInstance);
     void GetUsbsn(char * usbsn);
     bool IsSupportedDevice(unsigned short vendorid, unsigned short productid);
+    int SetUsbTimeoutDelay(int timeoutMS){ USBTIMEOUT = timeoutMS; return USBTIMEOUT;}
 private:
     bool VerifyDeviceHandle(struct usb_device* Handle);
     void* CurrentDeviceHandle;
     MerrifieldUtils *libutils;
-    static const int USBTIMEOUT = 5000;
+    int USBTIMEOUT;
     int target;
     int numinits;
     int reqnuminits;
@@ -200,6 +204,7 @@ public:
     bool SetUtilityInstance(void *UtilityInstance);
     void GetUsbsn(char * usbsn);
     bool IsSupportedDevice(unsigned short vendorid, unsigned short productid);
+    int SetUsbTimeoutDelay(int timeoutMS){ return timeoutMS;}
 private:
     HANDLE CurrentDeviceHandle;
     MerrifieldUtils *libutils;

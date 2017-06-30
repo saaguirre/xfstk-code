@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2014  Intel Corporation
+    Copyright (C) 2015  Intel Corporation
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -218,10 +218,13 @@ bool xfstkdldrthreadobj::downloadmtfwosthread()
 
             //Get the device and bind it to the downloader
             if(xfstkdevice) {
-                if(!xfstkdownloader->SetDevice(xfstkdevice)) {
+                if(!xfstkdownloader->SetDevice(xfstkdevice))
+                {
                     passfail = false;
                     goto cleanup;
                 }
+                int timeout = xfstkoptions->GetReadWriteTimeout();
+                xfstkdevice->SetUsbTimeoutDelay(timeout);
             }
         }
     }

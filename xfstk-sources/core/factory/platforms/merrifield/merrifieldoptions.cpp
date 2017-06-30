@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2014  Intel Corporation
+    Copyright (C) 2015  Intel Corporation
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -65,6 +65,7 @@ void MerrifieldOptions::Parse(int argc, char* argv[])
     ("gpflags",    po::value<std::string>()->default_value(""), "Optional argument. 32 Bit Hex Value of the GPFlags. For example, 0x80000000")
     ("debuglevel", po::value<std::string>()->default_value("0xffffffff"), "Optional argument. 32 Bit Hex Value of the debuglevel, LOG_STATUS | LOG_PROGRESS")
     ("usbdelayms", po::value<std::string>()->default_value("0"), "Optional argument. 32 Bit int Value of the usbdelayms, default 0ms")
+    ("usbtimeout", po::value<int>()->default_value(5000), "set USB read/write timeout, default 5000ms")
     ("wipeifwi",   po::bool_switch()->default_value(0), "Optional argument. Indicate whether to wipe out ifwi image on emmc. Set to false by default")
     ("transfer",   po::value<std::string>()->default_value("USB"), "Optional argument. Determines how the image will be transferred.")
     ("idrq",       po::bool_switch()->default_value(0), "Optional argument. Indicates whether IDRQ is used. 1 means idrq is used, 0 means idrq is not used.")
@@ -259,6 +260,10 @@ void MerrifieldOptions::Parse(int argc, char* argv[])
             usbdelayms = vm["usbdelayms"].as<string>();
             sscanf(usbdelayms.c_str(), "%ud", &this->usbdelayms);
         }
+        if(vm.count("usbtimeout"))
+        {
+            this->readWriteTimeout = vm["usbtimeout"].as<int>();
+        }
         if(vm.count("wipeifwi"))
         {
             this->wipeifwi = vm["wipeifwi"].as<bool>();
@@ -354,6 +359,7 @@ void MerrifieldOptions::Clear()
     this->downloadOS = false;
     this->isActionRequired = false;
     this->serialComPort = NULL;
+    this->readWriteTimeout = 5000;
 }
 
 bool MerrifieldOptions::allPathsAreValid()
@@ -766,8 +772,8 @@ bool MerrifieldOptions::validateCSDBState()
     bool retval = false;
     if(miscBinPath == "BLANK.bin")
     {
-        if(csdbStatus == "1" || csdbStatus =="2" || csdbStatus =="10")
-            retval = true;
+        //removing the requirement for payload per chaabi team request
+        retval = true;
     }else
     {
         scoped_file file(miscBinPath.c_str(),"rb");

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2014  Intel Corporation
+    Copyright (C) 2015  Intel Corporation
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -48,6 +48,7 @@ public:
     DeviceTransportType GetTransportType();
     const char* GetTransferType();
     unsigned int GetDebugLevel();
+    int GetReadWriteTimeout() {return 0;}
     const char* GetQuery();
     bool IsFWDownload();
     bool IsQuery();

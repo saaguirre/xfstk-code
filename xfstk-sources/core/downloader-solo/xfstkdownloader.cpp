@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2014  Intel Corporation
+    Copyright (C) 2015  Intel Corporation
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -86,9 +86,12 @@ bool XfstkDownloader::ExecuteDownload()
             RetVal = false;
         }
         //Bind device to the downloader
-        if(!this->xfstkdownloader->SetDevice(this->xfstkdevice)) {
+        if(!this->xfstkdownloader->SetDevice(this->xfstkdevice))
+        {
             RetVal = false;
         }
+        int timeout = xfstkoptions->GetReadWriteTimeout();
+        xfstkdevice->SetUsbTimeoutDelay(timeout);
         //Begin the update process and loop until complete
         while(!this->xfstkdownloader->UpdateTarget()) {
 

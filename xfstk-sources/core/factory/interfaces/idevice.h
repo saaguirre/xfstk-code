@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2014  Intel Corporation
+    Copyright (C) 2015  Intel Corporation
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -61,6 +61,7 @@ public:
     virtual bool SetDeviceHandle(void *DeviceHandle) = 0;
     virtual bool SetTransport(DeviceTransportType Transport) = 0;
     virtual void GetUsbsn(char * usbsn) = 0;
+    virtual int SetUsbTimeoutDelay(int timeoutMS) = 0;
 private:
 };
 

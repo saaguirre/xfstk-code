@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2014  Intel Corporation
+    Copyright (C) 2015  Intel Corporation
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -64,6 +64,7 @@ void CloverviewOptions::Parse(int argc, char* argv[])
     ("gpflags",    po::value<std::string>()->default_value(""), "Optional argument. 32 Bit Hex Value of the GPFlags. For example, 0x80000000")
     ("debuglevel", po::value<std::string>()->default_value("0xffffffff"), "Optional argument. 32 Bit Hex Value of the debuglevel, 0x1800 = LOG_STATUS | LOG_PROGRESS")
     ("usbdelayms", po::value<std::string>()->default_value("0"), "Optional argument. 32 Bit int Value of the usbdelayms, default 0ms")
+    ("usbtimeout", po::value<int>()->default_value(5000), "set USB read/write timeout, default 5000ms")
     ("wipeifwi",   po::bool_switch()->default_value(0), "Optional argument. Indicate whether to wipe out ifwi image on emmc before flash, set to false by default")
     ("transfer",   po::value<std::string>()->default_value("USB"), "Optional argument. Determines how the image will be transferred.")
     ("idrq",       po::bool_switch()->default_value(0), "Optional argument. Indicates whether IDRQ is used. 1 means idrq is used, 0 means idrq is not used.")
@@ -165,6 +166,10 @@ void CloverviewOptions::Parse(int argc, char* argv[])
             usbdelayms = vm["usbdelayms"].as<string>();
             sscanf(usbdelayms.c_str(), "%ud", &this->usbdelayms);
         }
+        if(vm.count("usbtimeout"))
+        {
+            this->readWriteTimeout = vm["usbtimeout"].as<int>();
+        }
         if(vm.count("wipeifwi"))
         {
             this->wipeifwi = vm["wipeifwi"].as<bool>();
@@ -233,6 +238,7 @@ void CloverviewOptions::Clear()
     this->downloadFW = false;
     this->downloadOS = false;
     this->isActionRequired = false;
+    this->readWriteTimeout = 5000;
 }
 
 bool CloverviewOptions::allPathsAreValid()

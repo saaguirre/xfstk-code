@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2014  Intel Corporation
+    Copyright (C) 2015  Intel Corporation
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -46,7 +46,8 @@
 #define LOG_PROGRESS    0x1000
 #define DEBUG_ERROR     0xfffffff1
 #define LOG_ALL         0xffffffff
-#define CSDB_HEADER_SIZE 16
+#define CSDB_HEADER_SIZE 12
+#define CSDB_RETURN_HEADER_SIZE 16
 
 class MerrifieldUtils
 {

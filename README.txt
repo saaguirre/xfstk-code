@@ -2,18 +2,22 @@ Install prerequisites:
 $ sudo apt-get install g++ qtcreator build-essential devscripts libxml2-dev alien doxygen graphviz libusb-dev libboost-all-dev 
 
 Install CMake:
+*note: Some repositories come with older versions of cmake. If that is the case, please build/install version cmake 2.8.11 or later
 http://www.cmake.org/cmake/resources/software.html
+Recommended version:
 http://www.cmake.org/files/v2.8/cmake-2.8.12.2.tar.gz
+View readme.txt in cmake tar.gz file for cmake build and install 
 
 How To Build This Software:
-$ mdkir build
+$ mdkir build (in the extracted xfstk downloader directory)
 $ cd build
 $ export DISTRIBUTION_NAME=ubuntu12.04
 $ export BUILD_VERSION=0.0.0
-$ cmake ..
+$ cmake .. 
+(make sure that this was the cmake directory that was manually built and installed, i.e. /usr/local/bin/cmake ..)
 $ make
 
-Optional targets are avialable. I.E:
+Optional targets are available. I.E:
 $ make docs
 or
 $ make package

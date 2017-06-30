@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2014  Intel Corporation
+    Copyright (C) 2015  Intel Corporation
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -21,6 +21,7 @@
 #include "merrifieldmessages.h"
 #include "merrifieldutils.h"
 #include "../../common/xfstktypes.h"
+#include <QFile>
 
 using namespace std;
 
@@ -187,9 +188,9 @@ int MerrifieldUtils::strstr_lowercase_strip(char szBuff[], const char *keyword, 
         if(1 == RIMGSize)
         {
             memmove(&RIMGBuff, szBuff + result + keyword_len + 4, 4);
-            u_log(LOG_UTIL, "RIMGBuff: %d", RIMGBuff);
+            u_log(LOG_UTIL, "RIMGBuff: %u", RIMGBuff);
             RIMGChunkSize = (ULONG)RIMGBuff;
-            u_log(LOG_UTIL, "%s, %d, %d, RIMGChunkSize: %d",
+            u_log(LOG_UTIL, "%s, %d, %d, RIMGChunkSize: %lu",
                   szBuff, result, keyword_len, RIMGChunkSize);
         }
         //get 32 bytes after IDRQ
@@ -455,7 +456,7 @@ uint32 MerrifieldUtils::FileSize(char* filename)
         fseek(fp, 0L, SEEK_END);
         siz = ftell(fp);
         fclose(fp);
-        u_log(LOG_UTIL, "%s size:%d bytes", filename, siz);
+        u_log(LOG_UTIL, "%s size:%u bytes", filename, siz);
     }
     return siz;
 }
@@ -482,39 +483,17 @@ unsigned int MerrifieldUtils::dwordCheckSum(unsigned char *buff, int size)
 size_t MerrifieldUtils::StringLocation(const char *file, string str, bool front)
 {
     size_t retval = std::string::npos;
-    size_t size;
 
-    std::fstream inFile;
-    inFile.open(file,std::ios_base::binary | std::ios_base::in);
+    QFile srcFile(file);
+    srcFile.open(QIODevice::ReadOnly);
 
-
-    if(inFile.is_open())
+    if(srcFile.isOpen())
     {
-        inFile.seekg(0,inFile.end);
-        size = inFile.tellg();
-        inFile.seekg(0,inFile.beg);
-
-
-        char* tmpBuff = new char[size];
-        std::string* tmpstr = new std::string();
-        tmpstr->reserve(size);
-
-
-        if(tmpBuff)
-        {
-            inFile.read(tmpBuff,size);
-            tmpstr->assign(tmpBuff,size);
-            retval = front  ? tmpstr->find(str) : tmpstr->rfind(str);
-            delete [] tmpBuff;
-        }
-        if(tmpstr)
-            delete tmpstr;
+        QByteArray fileContent = srcFile.readAll();
+        retval = front ? fileContent.indexOf(str.c_str()) : fileContent.lastIndexOf(str.c_str());
     }
 
-    inFile.close();
-
     return retval;
-
 }
 
 
@@ -523,15 +502,9 @@ size_t MerrifieldUtils::StringLocation(const char *buffer, string str, size_t si
 {
     size_t retval = std::string::npos;
 
-    std::string* tmpstr = new std::string();
-    if(tmpstr)
-    {
-        tmpstr->reserve(sizeofBuffer);
+    QByteArray bufferArray(buffer,sizeofBuffer);
 
-        tmpstr->assign(buffer,sizeofBuffer);
-        retval = tmpstr->find(str);
-        delete tmpstr;
-    }
+    retval = bufferArray.indexOf(str.c_str());
 
     return retval;
 

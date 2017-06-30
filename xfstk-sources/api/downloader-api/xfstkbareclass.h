@@ -135,6 +135,23 @@ public:
      *  \note None
      */
     virtual ~xfstkdldrapi();
+	
+    /*! DEPRECATED: Use setResponsebuffer & downloadercli methods
+     * \brief Allows for the retrieval of the IDRQ response from a device
+     *  \param buffer is the where the IDRQ response will be stored
+     *  \param maxsize is the maximum space allocated for buffer
+     *  \return TRUE if operation was a success or else FALSE
+     *  \exception none
+     *  \note Method currently only works for Merrifield platforms only
+     */
+    virtual bool idrqresponse(unsigned char *buffer, int maxsize);
+
+    /*! \brief API method to simulate CLI
+     *  \param CLI string
+     *  \return TRUE if operation was a success or else FALSE
+     *  \exception none
+     */
+    virtual bool downloadcli(const char *cli);
 
     /*! \brief Allows downloading a fwimage via spi
      *  \param fwfile is the file that is downloaded
@@ -152,23 +169,18 @@ public:
      */
     virtual bool hashverify(char *hashfile, bool write);
 
-    /*! \brief API method to simulate CLI
-     *  \param CLI string
-     *  \return TRUE if operation was a success or else FALSE
-     *  \exception none
-     */
-    virtual bool downloadcli(const char *cli);
 	
-    /*! \brief Set the response buffer for the CSDB provisioning
+    /*! \brief Set the response buffer for downloader operations
      *  \param responseBuffer buffer to be used
      *  \param maxsize the maximum size of the buffer
      *  \return none
      *  \exception
-     *  \note Call this before running the downloadcsdb() function
+     *  \note Call this before running the operation that elicit a response from the device
      */
-    virtual void setcsdbResponsebuffer(unsigned char* responseBuffer, int maxsize);
+    virtual void setResponsebuffer(unsigned char* responseBuffer, int maxsize);
 
-    /*! \brief Performs single shot firmware and operating system download.
+    /*! DEPRECATED: Use setResponsebuffer & downloadercli methods
+     *  \brief download csdb payloads 
      *  \param fwdnx Firmware download and execute (DnX) module.
      *  \param miscbin CSDB Payload file
      *  \param cmdcode CSDB command code
@@ -332,7 +344,7 @@ public:
      *  \exception None
      *  \note
      */
-    virtual bool registerdevicecallback(DevicesCallBack& callBackStruct, unsigned long ProductId=0);
+    virtual bool registerdevicecallback(DevicesCallBack* callBackStruct, unsigned long ProductId=0);
 
 #endif
 

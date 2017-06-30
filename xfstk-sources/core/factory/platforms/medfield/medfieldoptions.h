@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2014  Intel Corporation
+    Copyright (C) 2015  Intel Corporation
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -53,6 +53,7 @@ private:
     unsigned int debugLevel;
     unsigned int usbdelayms;
     unsigned int targetIndex;
+    int readWriteTimeout;
     string transferType;
     bool idrqEnabled;
     bool isVerbose;    
@@ -79,6 +80,7 @@ public:
     unsigned int GetGPFlags();
     unsigned int GetDebugLevel();
     unsigned int GetUsbdelayms();
+    int GetReadWriteTimeout() {return readWriteTimeout;}
     const char* GetTransferType();
     const char* GetQuery();
     bool IsIdrqEnabled();

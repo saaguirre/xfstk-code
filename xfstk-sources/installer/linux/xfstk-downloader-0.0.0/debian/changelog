@@ -1,3 +1,14 @@
+xfstk-downloader (1.8.0)
+
+  * [New Feature ] - USB timeout option implemented in CLI
+  * [New Feature ] - OS sizes greater than 4GB are properly printed
+  * [New Feature ] - The PMIC voltage conversion has been removed from the Battery Metering (Merr/Mofd)
+  * [New Feature ] - DownloadCLI method properly handles input files with spaces
+  * [New Feature ] - The magic number DTKN is now ignored when embedded in the chaabiFW0 binary
+  * [Bug fix] - Downloader no longer requires a payload for the CSDB flow
+
+  -- Intel Corporation <xfstk@intel.com>  Fri, 05 Feb 2015 08:00:00 -0700
+
 xfstk-downloader (1.7.3)
 
   * [New Feature ] - BZ228844 xFSTK downloader need to display new error codes during the PMIC NVM Provisioning

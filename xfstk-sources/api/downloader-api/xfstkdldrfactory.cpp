@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2014  Intel Corporation
+    Copyright (C) 2015  Intel Corporation
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -65,7 +65,9 @@ xfstkdldrfactory::xfstkdldrfactory()
     this->debuglevel = 0xFFFFFFFF;
     this->usbdelayms = 500;
     this->expandedOptions = 0;
-    idrqBuffSize = 0;
+    idrqBuffSize = NULL;
+    maxIdrqBuffSize = 0;
+    idrqBuffer = NULL;
 #if defined XFSTK_OS_WIN
     this->WinDriverDeviceFactory = new WDDeviceFactory();
 #endif
@@ -220,9 +222,9 @@ bool xfstkdldrfactory::ExecuteDownloadSerial()
                     }
                     xfstkdevice->SetDeviceHandle(tmphandle);
                 }
-                if(this->idrqBuffer.get() != NULL)
+                if(this->idrqBuffer != NULL)
                 {
-                    xfstkdownloader->GetResponse(this->idrqBuffer.get(),this->idrqBuffSize);
+                    *this->idrqBuffSize = xfstkdownloader->GetResponse(this->idrqBuffer,this->maxIdrqBuffSize);
                 }
                 last_error tmperror;
                 xfstkdownloader->GetLastError(&tmperror);
@@ -282,11 +284,16 @@ bool xfstkdldrfactory::BindInterfaces()
             //Get the device and bind it to the downloader
             xfstkdevice = NULL;
             xfstkdevice = this->XfstkDeviceList.at(counter);
-            if(xfstkdevice) {
-                if(!xfstkdownloader->SetDevice(xfstkdevice)) {
+            if(xfstkdevice)
+            {
+                if(!xfstkdownloader->SetDevice(xfstkdevice))
+                {
                     this->ClearAllLists();
                     return false;
+
                 }
+                int timeout = xfstkoptions->GetReadWriteTimeout();
+                xfstkdevice->SetUsbTimeoutDelay(timeout);
             }
 
         }
@@ -747,10 +754,11 @@ void xfstkdldrfactory::SetTransportType(DeviceTransportType transporttype)
     this->transporttype = transporttype;
 }
 
-void xfstkdldrfactory::SetIdrqResponse(unsigned char *buffer, int maxsize)
+void xfstkdldrfactory::SetIdrqResponse(unsigned char *buffer, int& maxsize)
 {
-     this->idrqBuffer.reset(buffer);
-     this->idrqBuffSize = maxsize;
+    this->idrqBuffer = buffer;
+    this->idrqBuffSize = &maxsize;
+    this->maxIdrqBuffSize = maxsize;
 }
 
 bool xfstkdldrfactory::GetLastError(LastError *er)
@@ -817,32 +825,30 @@ bool xfstkdldrfactory::ExecuteDownloadSingleAsync(char *fwdnx, char *fwimage, ch
                 case BAYTRAIL:
                     devicetype = BAYTRAIL;
                     break;
-                case CARBONCANYON:
-                    devicetype = CARBONCANYON;
-                    break;
                 default:
                     devicetype = XFSTK_NODEVICE;
                     break;
                 }
 
-                if(devicetype != XFSTK_NODEVICE) {
+                if(devicetype != XFSTK_NODEVICE)
+                {
                     //Create a device interface to communicate with the SoC
                     xfstkdevice = this->XfstkDldrFactory->CreateDevice(devicetype);
-                    if(xfstkdevice != NULL) {
+                    if(xfstkdevice != NULL)
+                    {
                         //Configure the device interface with transport type and physical device instance
                         if(xfstkdevice->SetTransport(this->transporttype))
                         {
-                            if(xfstkdevice->GetNumberAvailableDevices() > 0){
+                            if(xfstkdevice->GetNumberAvailableDevices() > 0)
+                            {
                                 //Here as soon as one device is detected, will break out
                                 //Suppose only one type of platform is plugged in at a time.
                                 devicedetected = true;
                                 break;
-                            } else {
-                                delete xfstkdevice;
-                                xfstkdevice = NULL;
                             }
                         }
-
+                        delete xfstkdevice;
+                        xfstkdevice = NULL;
                     }
                 }
             }
@@ -1093,32 +1099,30 @@ bool xfstkdldrfactory::ExecuteDownloadSingleAsync(char *fwdnx, char *fwimage, ch
                 case BAYTRAIL:
                     devicetype = BAYTRAIL;
                     break;
-                case CARBONCANYON:
-                    devicetype = CARBONCANYON;
-                    break;
                 default:
                     devicetype = XFSTK_NODEVICE;
                     break;
                 }
                 
-                if(devicetype != XFSTK_NODEVICE) {
+                if(devicetype != XFSTK_NODEVICE)
+                {
                     //Create a device interface to communicate with the SoC
                     xfstkdevice = this->XfstkDldrFactory->CreateDevice(devicetype);
-                    if(xfstkdevice != NULL) {
+                    if(xfstkdevice != NULL)
+                    {
                         //Configure the device interface with transport type and physical device instance
                         if(xfstkdevice->SetTransport(this->transporttype))
                         {
-                            if(xfstkdevice->GetNumberAvailableDevices() > 0){
+                            if(xfstkdevice->GetNumberAvailableDevices() > 0)
+                            {
                                 //Here as soon as one device is detected, will break out
                                 //Suppose only one type of platform is plugged in at a time.
                                 devicedetected = true;
                                 break;
-                            } else {
-                                delete xfstkdevice;
-                                xfstkdevice = NULL;
                             }
                         }
-
+                        delete xfstkdevice;
+                        xfstkdevice = NULL;
                     }
                 }
             }

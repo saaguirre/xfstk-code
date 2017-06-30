@@ -123,6 +123,10 @@ rich/*!
                         <td>Optional argument. 32 bit int value to set the usbdelayms, default 0ms</td>
 		</tr>
 		<tr>
+                        <td><b>--usbtimeout arg (=5000)</b></td>
+                        <td>set USB read/write timeout, default 5000ms</td>
+		</tr>
+		<tr>
 			<td><b>--emmcdump arg</b></td>
 			<td>CLVP/MOFD only - Optional argument. Indicate whether to perform an emmc dump. Set to false by default</td>
 		</tr>

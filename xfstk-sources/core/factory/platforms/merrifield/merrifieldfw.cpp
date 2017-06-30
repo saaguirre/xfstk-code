@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2014  Intel Corporation
+    Copyright (C) 2015  Intel Corporation
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -283,7 +283,8 @@ bool MerrifieldFW::initChaabiSize()
 
     {
         CH00 -= 0x80;
-        if(DTKN != std::string::npos)
+        //if there is a dnx Token and it comes before the chaabi firmeware
+        if((DTKN != std::string::npos) && (static_cast<long>(DTKN - CH00) < 0))
         {
             scoped_file file(m_fname_dnx_fw,"rb");
             size_t filesize = file.size();
@@ -913,10 +914,6 @@ bool MerrifieldFW::InitCSDB(const string& csdbstatus)
                 if(file.read(m_csdb,1,m_csdb_size) != m_csdb_size)
                     throw std::runtime_error("Error reading CSDB from file");
             }
-            else if((tmpbyte > 2) || (tmpbyte ==0))
-            {
-                throw std::runtime_error("Error this CSDB command requires a payload");
-            }
             //check to see if file is payload or full csdb structure.
             if(m_csdb_size >4 ? (std::string(reinterpret_cast<const char*>(m_csdb),4) != "CSDB") : 1)
             {
@@ -926,6 +923,7 @@ bool MerrifieldFW::InitCSDB(const string& csdbstatus)
 
                 int offset = 0;
                 boost::scoped_array<unsigned char> tmp(new unsigned char[m_csdb_size + CSDB_HEADER_SIZE]);
+                memset(tmp.get(),0,m_csdb_size + CSDB_HEADER_SIZE);
                 //copy magic number
                 strcpy(reinterpret_cast<char*>(tmp.get()),"CSDB");
                 offset += 4;
