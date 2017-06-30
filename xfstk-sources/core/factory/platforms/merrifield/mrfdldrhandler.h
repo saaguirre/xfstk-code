@@ -268,6 +268,13 @@ class MrfdEmmcDumpER40: public IBaseVisitable<>
 public:
     ADD_ACCEPT_FUNC()
 };
+
+class MrfdHandleLogDevice: public IBaseVisitable<>
+{
+public:
+    ADD_ACCEPT_FUNC()
+};
+
 // end emmc
 
 #endif // MRFDLDRHANDLER_H

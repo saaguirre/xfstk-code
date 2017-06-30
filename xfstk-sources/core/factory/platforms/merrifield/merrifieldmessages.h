@@ -133,6 +133,24 @@
 #define BULK_ACK_ER45               0x45523435ULL        //ER45 – Error response to “SPR$” in case failure during eMMC partition switching
 #define BULK_ACK_ER46               0x45523436ULL        //ER46 – Error response to “ECSD” in case failure reading ext CSD from eMMC
 
+//PMIC Provisioning errors and messages
+#define BULK_ACK_ER90               0x45523930ULL        //ER90
+#define BULK_ACK_ER91               0x45523931ULL        //ER91
+#define BULK_ACK_ER92               0x45523932ULL        //ER92
+#define BULK_ACK_ER93               0x45523933ULL        //ER93
+#define BULK_ACK_ER94               0x45523934ULL        //ER94
+#define BULK_ACK_ER95               0x45523935ULL        //ER95
+#define BULK_ACK_ER96               0x45523936ULL        //ER96
+#define BULK_ACK_ER97               0x45523937ULL        //ER97
+#define BULK_ACK_ER98               0x45523938ULL        //ER98
+#define BULK_ACK_ER99               0x45523939ULL        //ER99
+#define BULK_ACK_ER9A               0x45523941ULL        //ER9A
+#define BULK_ACK_ER9B               0x45523942ULL        //ER9B
+#define BULK_ACK_PP90               0x50503930ULL        //PP90
+#define BULK_ACK_PP91               0x50503931ULL        //PP91
+#define BULK_ACK_PPOK               0x50504F4BULL        //PPOK
+
+
 #define BULK_ACK_ERRR               0x45525252ULL        // 'ERRR'
 #define BULK_ACK_ERB0               0x45524230ULL        // 'ERB0'
 #define BULK_ACK_ERB1               0x45524231ULL        // 'ERB1'
@@ -148,9 +166,9 @@
 #define BULK_ACK_DCSDB              0x4443534442ULL
 #define BULK_ACK_UCSDB              0x5543534442ULL
 
-#define MAX_ACK_CODE_MERRIFIIELD    41
+#define MAX_ACK_CODE_MERRIFIIELD    56
 
-#define MAX_ERROR_CODE              45
+#define MAX_ERROR_CODE_MERRIFIIELD  59
 #define OSIP_PARTITIONTABLE_SIZE    0x200
 
 // OS Recovery HOST Commands

@@ -24,7 +24,7 @@
 #include "merrifielddownloader.h"
 
 using namespace std;
-extern CPSTR Merrifield_error_code_array [MAX_ERROR_CODE];  //JG - This is really used but it ijust a data array that we can just read.
+extern CPSTR Merrifield_error_code_array [MAX_ERROR_CODE_MERRIFIIELD];  //JG - This is really used but it ijust a data array that we can just read.
 
 MerrifieldDownloader::MerrifieldDownloader()
 {

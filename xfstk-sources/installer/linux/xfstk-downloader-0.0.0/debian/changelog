@@ -1,9 +1,20 @@
+xfstk-downloader (1.7.3)
+
+  * [New Feature ] - BZ228844 xFSTK downloader need to display new error codes during the PMIC NVM Provisioning
+
+  -- Intel Corporation <xfstk@intel.com>  Tue, 18 Nov 2014 08:00:00 -0700
+
+xfstk-downloader (1.7.2)
+
+  * [New Feature] - Debian /Ubuntu 14.04 support
+
+  -- Intel Corporation <xfstk@intel.com>  Tue, 30 Sep 2014 08:00:00 -0700
+
 xfstk-downloader (1.7.1)
 
   * [Bug fix] - bug in api related to OS dnx
 
   -- Intel Corporation <xfstk@intel.com>  Mon, 21 Jul 2014 08:00:00 -0700
-
 
 xfstk-downloader (1.7.0)
 

@@ -37,7 +37,7 @@
 
 #define USB_READ_WRITE_DELAY_MS 0
 
-extern CPSTR Merrifield_error_code_array [MAX_ERROR_CODE];  
+extern CPSTR Merrifield_error_code_array [MAX_ERROR_CODE_MERRIFIIELD];
 
 #define FILENAME "emmc_dump2.bin"
 #define BLOCKSIZE          512
@@ -326,6 +326,24 @@ mrfdldrstate::mrfdldrstate()
     m_bulk_ack_map.insert(std::make_pair(BULK_ACK_ER07, new MrfdErHandleLogError));
     m_bulk_ack_map.insert(std::make_pair(BULK_ACK_ERRR, new MrfdErHandleERRR));
 
+    //PMIC Provisioning
+    m_bulk_ack_map.insert(std::make_pair(BULK_ACK_ER90, new MrfdErHandleLogError));
+    m_bulk_ack_map.insert(std::make_pair(BULK_ACK_ER91, new MrfdErHandleLogError));
+    m_bulk_ack_map.insert(std::make_pair(BULK_ACK_ER92, new MrfdErHandleLogError));
+    m_bulk_ack_map.insert(std::make_pair(BULK_ACK_ER93, new MrfdErHandleLogError));
+    m_bulk_ack_map.insert(std::make_pair(BULK_ACK_ER94, new MrfdErHandleLogError));
+    m_bulk_ack_map.insert(std::make_pair(BULK_ACK_ER95, new MrfdErHandleLogError));
+    m_bulk_ack_map.insert(std::make_pair(BULK_ACK_ER96, new MrfdErHandleLogError));
+    m_bulk_ack_map.insert(std::make_pair(BULK_ACK_ER97, new MrfdErHandleLogError));
+    m_bulk_ack_map.insert(std::make_pair(BULK_ACK_ER98, new MrfdErHandleLogError));
+    m_bulk_ack_map.insert(std::make_pair(BULK_ACK_ER99, new MrfdErHandleLogError));
+    m_bulk_ack_map.insert(std::make_pair(BULK_ACK_ER9A, new MrfdErHandleLogError));
+    m_bulk_ack_map.insert(std::make_pair(BULK_ACK_ER9B, new MrfdErHandleLogError));
+    m_bulk_ack_map.insert(std::make_pair(BULK_ACK_PP90, new MrfdHandleLogDevice));
+    m_bulk_ack_map.insert(std::make_pair(BULK_ACK_PP91, new MrfdHandleLogDevice));
+    m_bulk_ack_map.insert(std::make_pair(BULK_ACK_PPOK, new MrfdHandleLogDevice));
+
+
     //Setup state map
     m_bulk_ack_map.insert(std::make_pair(DLDR_STATE_FW_NORMAL, new MrfdStHandleFwNormal));
     m_bulk_ack_map.insert(std::make_pair(DLDR_STATE_FW_MISC, new MrfdStHandleFwMisc));
@@ -351,6 +369,23 @@ mrfdldrstate::mrfdldrstate()
     m_fw_error_map.insert(std::make_pair(BULK_ACK_ER06, i++));
     m_fw_error_map.insert(std::make_pair(BULK_ACK_ER07, i++));
     m_fw_error_map.insert(std::make_pair(BULK_ACK_ER26, i++));
+    m_fw_error_map.insert(std::make_pair(BULK_ACK_ER90, i++));
+    m_fw_error_map.insert(std::make_pair(BULK_ACK_ER91, i++));
+    m_fw_error_map.insert(std::make_pair(BULK_ACK_ER92, i++));
+    m_fw_error_map.insert(std::make_pair(BULK_ACK_ER93, i++));
+    m_fw_error_map.insert(std::make_pair(BULK_ACK_ER94, i++));
+    m_fw_error_map.insert(std::make_pair(BULK_ACK_ER95, i++));
+    m_fw_error_map.insert(std::make_pair(BULK_ACK_ER96, i++));
+    m_fw_error_map.insert(std::make_pair(BULK_ACK_ER97, i++));
+    m_fw_error_map.insert(std::make_pair(BULK_ACK_ER98, i++));
+    m_fw_error_map.insert(std::make_pair(BULK_ACK_ER99, i++));
+    m_fw_error_map.insert(std::make_pair(BULK_ACK_ER9A, i++));
+    m_fw_error_map.insert(std::make_pair(BULK_ACK_ER9B, i++));
+
+    m_fw_log_map.insert(std::make_pair(BULK_ACK_PP90, i++));
+    m_fw_log_map.insert(std::make_pair(BULK_ACK_PP91, i++));
+    m_fw_log_map.insert(std::make_pair(BULK_ACK_PPOK, i++));
+
     m_last_error.error_code = 1;
     strcpy(m_last_error.error_message, "Init error");
 
@@ -668,7 +703,7 @@ void mrfdldrstate::LogError(unsigned long errorcode)
         m_last_error.error_code = errorcode;
         this->m_utils->u_log(LOG_STATUS, "Invalid Progress bar initialization");
     }
-    if(errorcode < MAX_ERROR_CODE)
+    if(errorcode < MAX_ERROR_CODE_MERRIFIIELD)
     {
         if(errorcode == 0)
         {
@@ -2258,6 +2293,28 @@ void mrfdldrstate::Visit(MrfdErHandleLogError& )
     } else {
         this->m_utils->u_log(LOG_STATUS, "Unknown ACK code, aborting ...");
         m_abort = true;
+    }
+}
+
+
+//Added for PMIC provision, this state simply relays a message from the device
+void mrfdldrstate::Visit(MrfdHandleLogDevice& )
+{
+    if(m_achCode)
+    {
+        if(m_fw_log_map.find(m_achCode) != m_fw_log_map.end())
+        {
+            unsigned long logCode = m_fw_log_map[m_achCode];
+            if(logCode < MAX_ERROR_CODE_MERRIFIIELD)
+            {
+                this->m_utils->u_log\
+                        (LOG_STATUS,"%s", Merrifield_error_code_array[logCode]);
+            }
+        }
+    }
+    else
+    {
+        this->m_utils->u_log(LOG_STATUS, "Unknown ACK code... 0x%X",m_achCode );
     }
 }
 

@@ -24,7 +24,8 @@
 
 using namespace std;
 
-CPSTR Merrifield_error_code_array [44] = {
+//This is being leveraged for generic codes from device
+CPSTR Merrifield_error_code_array [MAX_ERROR_CODE_MERRIFIIELD] = {
                         "Success",                                                                //0
                         "Connection error",                                                       //1
                         "Aborted by User",                                                    	  //2
@@ -68,8 +69,22 @@ CPSTR Merrifield_error_code_array [44] = {
                         "ER04 - SecurityInit",                                                    //40
                         "ER06 - Key Index 0",                                                     //41
                         "ER07 - Key Index 0",                                                     //42
-                        "ER26 - Storage Programming"                                              //43
-
+                        "ER26 - Storage Programming",                                             //43
+                        "ER90 - payload contains checksum error",                                 //44
+                        "ER91 - payload contains invalid reset id",                               //45
+                        "ER92 - payload section contains invalid data_type_0 for the owner",      //46
+                        "ER93 - payload section contains invalid data_type_1 for the owner",      //47
+                        "ER94 - payload contains invalid section length for production owner",    //48
+                        "ER95 - payload does not contain any version information",                //49
+                        "ER96 - not enough space left on NVM to perform provisioning",            //50
+                        "ER97 - user decided to abort",                                           //51
+                        "ER98 - NVM read failed",                                                 //52
+                        "ER99 - NVM write failed",                                                //53
+                        "ER9A - NVM read-back and compare failed",                                //54
+                        "ER9B - failed to send 'HLT$' message to host",                           //55
+                        "PP90 - No payload found - Continue",                                     //56
+                        "PP91 - given payload is not a new one - Continue",                       //57
+                        "PPOK - Pmic Provisioning finished successfully"                          //58
 };
 
 MerrifieldUtils::MerrifieldUtils()
@@ -239,7 +254,23 @@ ULONGLONG MerrifieldUtils::scan_string_for_protocol(char szBuff[])
         BULK_ACK_ERB1,            //37
         BULK_ACK_RTBD,            //38
         BULK_ACK_DCSDB,           //39
-        BULK_ACK_UCSDB            //40
+        BULK_ACK_UCSDB,           //40
+
+        BULK_ACK_ER90,            //41
+        BULK_ACK_ER91,            //42
+        BULK_ACK_ER92,            //43
+        BULK_ACK_ER93,            //44
+        BULK_ACK_ER94,            //45
+        BULK_ACK_ER95,            //46
+        BULK_ACK_ER96,            //47
+        BULK_ACK_ER97,            //48
+        BULK_ACK_ER98,            //49
+        BULK_ACK_ER99,            //50
+        BULK_ACK_ER9A,            //51
+        BULK_ACK_ER9B,            //52
+        BULK_ACK_PP90,            //53
+        BULK_ACK_PP91,            //54
+        BULK_ACK_PPOK             //55
     };
 
     int index = index_of_keyword(szBuff, StepID);
@@ -301,8 +332,25 @@ int MerrifieldUtils::index_of_keyword(char szBuff[], int start_index)
         "ERB0",      //36
         "ERB1",      //37
         "RTBD",      //38
+        //CSDB
         "DCSDB",     //39
-        "UCSDB"      //40
+        "UCSDB",     //40
+        //PMIC Provisioning
+        "ER90",      //41
+        "ER91",      //42
+        "ER92",      //43
+        "ER93",      //44
+        "ER94",      //45
+        "ER95",      //46
+        "ER96",      //47
+        "ER97",      //48
+        "ER98",      //49
+        "ER99",      //50
+        "ER9A",      //51
+        "ER9B",      //52
+        "PP90",      //53
+        "PP91",      //54
+        "PPOK"       //55
     };
 
     for(int i=start_index; i< MAX_ACK_CODE_MERRIFIIELD; i++){

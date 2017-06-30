@@ -26,7 +26,7 @@
 #include "merrifieldfw.h"
 #include "../../common/scoped_file.h"
 
-extern CPSTR Merrifield_error_code_array [MAX_ERROR_CODE];  //JG - This is really used but it ijust a data array that we can just read.
+extern CPSTR Merrifield_error_code_array [MAX_ERROR_CODE_MERRIFIIELD];  //JG - This is really used but it ijust a data array that we can just read.
 
 MerrifieldFW::MerrifieldFW()
 {
@@ -538,7 +538,7 @@ unsigned long MerrifieldFW::GetDataChunckSize(unsigned long tempData)
 void MerrifieldFW::LogError(int errorcode)
 {
     this->m_utils->u_log(LOG_ENTRY, "%s", __FUNCTION__);
-        if(errorcode < MAX_ERROR_CODE)
+        if(errorcode < MAX_ERROR_CODE_MERRIFIIELD)
             this->m_utils->u_abort("Error Code: %d - %s", errorcode, Merrifield_error_code_array[errorcode]);
 }
 

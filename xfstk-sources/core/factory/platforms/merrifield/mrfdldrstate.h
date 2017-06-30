@@ -103,6 +103,7 @@ class mrfdldrstate: public IVisitor
         , public Visitor<MrfdEmmcDumpEOIO>
         , public Visitor<MrfdEmmcDumpRDY$>
         , public Visitor<MrfdEmmcDumpER40>
+        , public Visitor<MrfdHandleLogDevice>
 {
 public:
     mrfdldrstate();
@@ -160,6 +161,7 @@ public:
     virtual void Visit(MrfdStHandleOsNormal& hdlr);//
     virtual void Visit(MrfdStHandleOsMisc& hdlr);//
     virtual void Visit(MrfdErHandleLogError& hdlr);//
+    virtual void Visit(MrfdHandleLogDevice& hdlr);
     virtual void Visit(MrfdErHandleERRR& hdlr);
     virtual void Visit(MrfdFwHandleDCSDB& hdlr);
     virtual void Visit(MrfdFwHandleUCSDB& hdlr);
@@ -173,6 +175,7 @@ public:
     virtual void Visit(MrfdEmmcDumpRDY$& hdlr);
     virtual void Visit(MrfdEmmcDumpER40& hldr);
     // end emmc
+
 
 private:
     bool WriteOutPipe(unsigned char* pbuf, uint32 size);
@@ -264,6 +267,7 @@ private:
 
     HandleMapType m_bulk_ack_map;
     ErrorMapType m_fw_error_map;
+    ErrorMapType m_fw_log_map;
     boost::scoped_array<unsigned char> ResponseBuff;
     int ResponseBuffSize;
     mrfdldrstate(const mrfdldrstate&);
