@@ -247,6 +247,7 @@ bool CloverviewOptions::allPathsAreValid()
         if(fp)
         {
             fclose(fp);
+            fp = NULL;
         }
         else if(!(this->fwDnxPath.c_str() == blankbinpath))
         {
@@ -261,6 +262,7 @@ bool CloverviewOptions::allPathsAreValid()
         if(fp)
         {
             fclose(fp);
+            fp = NULL;
         }
         else if(!(this->fwImagePath.c_str() == blankbinpath))
         {
@@ -275,6 +277,7 @@ bool CloverviewOptions::allPathsAreValid()
         if(fp)
         {
             fclose(fp);
+            fp = NULL;
         }
         else if(!(this->osDnxPath.c_str() == blankbinpath))
         {
@@ -289,6 +292,7 @@ bool CloverviewOptions::allPathsAreValid()
         if(fp)
         {
             fclose(fp);
+            fp = NULL;
         }
         else if(!(this->osImagePath.c_str() == blankbinpath))
         {
@@ -300,6 +304,7 @@ bool CloverviewOptions::allPathsAreValid()
     if(fp)
     {
         fclose(fp);
+        fp = NULL;
     }
 
     return allPathsAreValid;

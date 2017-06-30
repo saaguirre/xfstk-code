@@ -572,7 +572,6 @@ bool MerrifieldFW::InitFwImage(bool)
         m_fw_image_size  = this->m_utils->FileSize(m_fname_fw_image);
         m_ifwi = new unsigned char[m_fw_image_size];
 
-
         if(fp_fw_image)
         {
             if(fread(m_ifwi, m_fw_image_size, 1, fp_fw_image)== 0)

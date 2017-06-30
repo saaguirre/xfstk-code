@@ -136,7 +136,7 @@ bool BaytrailOptions::allPathsAreValid()
 {
     this->isActionRequired = true;
     bool allPathsAreValid = false;
-    FILE *fp;
+    FILE *fp = NULL;
 
     fp = fopen(this->fwImagePath.c_str(), "rb");
     if(fp)
@@ -144,6 +144,7 @@ bool BaytrailOptions::allPathsAreValid()
         allPathsAreValid = true;
         this->isActionRequired = true;
         fclose(fp);
+        fp = NULL;
         return true;
     }
 
