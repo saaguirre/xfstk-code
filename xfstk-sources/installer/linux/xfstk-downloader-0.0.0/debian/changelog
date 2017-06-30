@@ -1,0 +1,123 @@
+xfstk-downloader (1.5.3) unstable; urgency=low
+
+  * [New Feature] required S3 security update
+
+ -- Intel Corporation <xfstk@intel.com>  Wed, 02 Apr 2014 08:00:00 -0700
+
+xfstk-downloader (1.5.2) unstable; urgency=low
+
+  * [Bug fix] BZ166680  - iSoC must support win8 32 & 64 bits
+  * [Bug fix] BZ166686  - xFSTK Downloader must support win8 64
+  * [New Feature] xFSTK Downloader & iSoC Driver support for Win 8/8.1 32/64bits
+  * [New Feature] iSoC USB Driver support for Moorefiled
+
+
+ -- Intel Corporation <xfstk@intel.com>  Wed, 26 jan 2014 08:00:00 -0700
+
+xfstk-downloader (1.5.1) unstable; urgency=low
+
+  * [Bug fix] BZ159032 - xFSTK Downloader to include DCSDB & UCSDB for ANN
+
+ -- Intel Corporation <xfstk@intel.com>  Tue, 07 jan 2014 08:00:00 -0700
+
+xfstk-downloader (1.5.0) unstable; urgency=low
+
+  * [Bug fix] BZ126119 - xfstk-Downloader: Progress message jumps from 12 to 100 on Merr FW Download.
+  * [Bug fix] BZ13140 - Ubuntu SDK xfstk-dldr-example-parallel &  xfstk-dldr-example-serial example code FAIL to build with QT Creator
+  * [Bug fix] BZ131402 - xfstk-downloader x86_64 1.4.3 installation error on ubuntu 12.04 64-bit
+  * [Bug fix] BZ126118 - xfstk-downloader: CLI -r and --rev options report 'ingredient mismatch
+  * [Bug fix] BZ142884 - Downloader enters a bad state due to the unique flow performing OS Recovery DnX on CR4 with the UTMI Signal Hill PHY
+  * [Bug fix] BZ154603  - Flashing dnx with token container header fails
+  * [Update] Downloader 1.5.0 includes a SO name change to API libraries provided. It is now recommended  that you link to, and install the library provided in the downloader SDK.
+
+ -- Intel Corporation <xfstk@intel.com>  Wed, 18 Dec 2013 08:00:00 -0700
+
+
+xfstk-downloader (1.4.3) unstable; urgency=low
+
+  * [Bug fix] BZ139268 - MERR-PR2/VV with TNG B0 XFSTK fails to flash IFWI
+  * [Bug fix] BZ139950 - xFSTK-downloader CSDB request does not work on Linux
+  * [Bug fix] BZ119312 - xfstk-Downloader-GUI Help menu does NOT contain any documentation on the new Baytrail fw download feature.
+  * [Bug fix] BZ120035 - xfstk downloader API - only accepts 16-char serial num for MERR platform with Linux OS
+  * [Bug fix] BZ123648 - Add Carbon Canyon Downloader Support
+  * [Bug fix] BZ124818 - NFR: SPAT Token Generation and SPAT update within IFWI for Downloader
+  * [Bug fix] BZ126016 - xfstk API Impossible to flash Saltbay and Bodegabay with MT Api on ubuntu
+  * [Bug fix] BZ126136 - xfstk downloader: hashverify API function is non-operational
+  * [Bug fix] BZ128593 - Updated FUPH header/CSDB flows required to be implemented by xFSTK downloader
+  * [Update] Changes have been made to the GUI to ensure full ANN PID/VID compatibility
+  * [Update] CSDB protocol is supported in API and CLI
+  * [Update] Both FUPH v00.01 and FUPH v00.00 are supported
+
+ -- Intel Corporation <xfstk@intel.com>  Thu, 26 Sep 2013 08:00:00 -0700
+
+ 
+xfstk-downloader (1.4.2) unstable; urgency=low
+
+  * [Bug fix] 114219 - Dumped data of boot partition due to DnX is not the same as the one on eMMC
+  * [Bug fix] 104660 - xFSTK-Downloader GUI is corrupted AFTER a crash or segfault due to qt qsettings for xfstk *.conf files
+  * [Bug fix] 109788 - xfstk downloader api: error code is not showing error occurred
+  * [Bug fix] 116015 - xfstk Downloader: CLI running tool with only optional option prints revision output (xfstk-dldr-solo --wipeifwi)
+  * [Bug fix] 77609 - xfstk-downloader bug 69614 -> retry with wrong file size
+  * [Bug fix] 99175 - xfstk: error occurs during downloading but xfstk returns flashing done successfully
+  * [Bug fix] 86511 - Build server to generate the symbol files for the release version of xfstk-dldr-api
+  * [Bug fix] 101476 - xFSTK downloader to handle new IDRQ response
+  * [Bug fix] 51285 - xFSTK downloader ran with the default MFD plugin selected, even though on a CLVP target and it still passed - no check in place ??
+  * [New Feature] 59077 - xFSTK 1.2.2 poor usability as flashing requires pressing "Begin Download" at correct moment
+  * [New Feature] Bug 101465 - xFSTK downloader to support ANN/TNG B0 UFS changes
+  * [New Feature] Baytrail SPI Downloader using dediprog feater added
+
+ -- Intel Corporation <xfstk@intel.com>  Thu, 24 Jul 2013 08:00:00 -0700
+
+
+xfstk-downloader (1.4.1) unstable; urgency=low
+
+  * [Bug fix] BZ97439	xfstk-downloader: The Doxygen file provided does not say Fedora is a supported OS.
+  * [Bug fix] BZ101028	xfstk downloader api doxygen documentation needs updating
+  * [Bug fix] BZ106015	Downloader HVM: During testing ~1% of provision attempts see error “InitFwImage Exception raised bad allocation” which causes the test to hang at ~800+ cycles
+  * [Bug fix] BZ114353	TEEWINOT: xfstk-downloader to not allow the download of padding, padding to 2MB IFWI before FUPH header
+
+ -- Intel Corporation <xfstk@intel.com>  Fri, 14 Jun 2013 08:00:00 -0700
+
+
+xfstk-downloader (1.4.0) unstable; urgency=low
+
+  * [New Feature] x64Bit ubuntu 12.04 package
+  * [Bug fix] BZ97116	Using static allocation of the xfstkdldrapi object can cause phoneFlash/mFlash to crash at start-up
+  * [Bug fix] BZ94658	Need support for setmiscdnxpath() with async download
+  * [Bug fix] BZ90477	Install Error for iSocUSB-Driver-Setup-1.0.2.exe
+  * [Bug fix] BZ86497	xfstk downloader api header file (xfstkdldrapi.h) documentation is incomplete
+  * [Bug fix] BZ81191	xfstk-downloader CLVP B1 not listed in downloader GUI in 1.3.5
+  * [Bug fix] BZ78759	Reconcile xfstk downloader error codes with Merrifield FAS
+  * [Bug fix] BZ77996	iSocUSB Driver 1.0.2 Installer Incorrectly Reports Version
+  * [Bug fix] BZ69624	xfstk-downloader: FW+OS download completes but details window reads 'Success: FW download completed! OS download skipped
+  * [Bug fix] BZ69623	xfstk-downloader: wipeifwi passed, BUT log message says failed
+  * [Bug fix] BZ69605	xfstk-downlaoder: last log entry after SUCCESSFUL OS download states that "Download of OS skipped" (GUI ONLY)
+  * [Bug fix] BZ654874	xfstk downloader API functions (setloglevel & setwipeifwi) only work with multi-target download function
+  * [Bug fix] BZ69620	xFSTK Downloader: hashVerify feat - no help menu is displayed if user inputs invalid arg 
+  
+ -- Intel Corporation <xfstk@intel.com>  Thu, 9 Mar 2013 08:00:00 -0700
+ 
+ 
+xfstk-downloader (1.3.7) unstable; urgency=low
+
+  * [New Feature] Hash verify changes for IDRQ response
+  * [New Feature] Moorefield iDevice addition
+  * [New Feature] API device callback added
+  * [Update] Device detection changes
+  * [Update] Merrifield Visitor pattern
+  * [Bug fix] BZ81193 - xfstk-downloader Copyright is 2012, should be changed to 2013 for GUI, CLI & Doxygen
+  * [Bug fix] BZ63461 - Add Secure eMMC Dump support to xFSTK Downloader
+  * [Bug fix] BZ85907 - xFSTK Downloader emmcdump feature will seg fault with an invalid "unsigned-fwrdnx.bin" file
+
+ -- Intel Corporation <xfstk@intel.com>  Tue, 2 Apr 2013 08:00:00 -0700
+
+
+xfstk-downloader (1.3.6) unstable; urgency=low
+
+ * [New Feature] New SDK, with support for soft fusing with multi-target (HVM) configurations added to the API. This includes Doxygen updates for the new API calls.
+ * [Bug Fix] BZ81831 - An infinite loop happen when flashing fw with CTP devices fix. implement a "kill" feature for downloader and API to stop firmware provision without retry
+ * [Bug Fix] BZ83623 - mft: reports crash in xfstk dll module Medfield Changes to quit if IFWI or OS images are not initialized
+
+ -- Intel Corporation <xfstk@intel.com>  Tue, 12 Feb 2013 08:00:00 -0700
+
+

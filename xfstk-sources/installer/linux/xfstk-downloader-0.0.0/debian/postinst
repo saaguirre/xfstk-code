@@ -1,0 +1,16 @@
+#!/bin/sh
+if [ "$1" = "configure" ] && [ -x "`which update-menus 2>/dev/null`" ]; then
+	update-menus
+fi
+udevadm control --reload-rules
+restart udev
+udevadm control --reload-rules
+restart udev
+
+chmod a+w /usr/lib/xfstk/xfstkdldrplugins/Intel.ini > /dev/null 2>&1
+chmod a+w /usr/lib64/xfstk/xfstkdldrplugins/Intel.ini > /dev/null 2>&1
+ln -s /usr/lib/xfstk/ld.so.conf /etc/alternatives/xfstk_conf > /dev/null 2>&1
+ln -s /etc/alternatives/xfstk_conf /etc/ld.so.conf.d/xfstk.conf > /dev/null 2>&1
+ldconfig
+
+

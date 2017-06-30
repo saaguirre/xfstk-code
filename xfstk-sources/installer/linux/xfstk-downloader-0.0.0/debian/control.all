@@ -1,0 +1,16 @@
+Source: xfstk-downloader	
+Section: devel
+Priority: optional
+Maintainer: Intel Corporation <xfstk@intel.com>
+Build-Depends: debhelper (>= 7)
+Standards-Version: 3.8.3
+Homepage: http://www.intel.com
+
+Package: xfstk-downloader
+Architecture: all
+Replaces: xfstk, xfstk-downloader
+Provides: xfstk-downloader
+Depends: libusb-dev, libxml2-dev, libqtcore4, libqtgui4
+Suggests: ia32-libs
+Recommends: ia32-libs
+Description: This tool provides support for Intel SOC firmware and os download.

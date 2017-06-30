@@ -1,0 +1,13 @@
+<RCC>
+    <qresource prefix="/about">
+        <file>xfstk.png</file>
+    </qresource>
+    <qresource prefix="/menu/options">
+        <file>icons/network-transmit-2.png</file>
+        <file>icons/preferences-system-4.png</file>
+    </qresource>
+    <qresource prefix="/menu/help">
+        <file>icons/help-browser-2.png</file>
+        <file>icons/xfstk.png</file>
+    </qresource>
+</RCC>

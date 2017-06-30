@@ -1,0 +1,545 @@
+/*!
+ *  \file xfstk-doxygen.cpp
+ *  \brief General documentation file for xFSTK.
+*/
+
+/*!
+
+    \mainpage Welcome: xFSTK Cross Platform Firmware & Software Tool Kit
+
+    \brief xFSTK Provides basic firmware and software provisioning capabilities for Intel SoC platforms.
+    Currently xFSTK supports Windows XP 32-bit, Windows 7 32-bit/64-bit, Windows 8 64-bit, Ubuntu 10.04 LTS 32-bit/64-bit, Ubuntu 12.04 LTS 32-bit/64-bit, Red Hat, and Fedora 16 32-bit/64-bit hosts.
+
+    \section feat_sec Features
+   <ul>
+   <li> xFSTK Features:
+   <ol>
+   <li>GUI - Provides automatic target detection, specification of download and execute modules,
+   specification of firmware and os images, and download of firmware and os to Intel SoC targets.
+   <li>Command Line - Provides a simple scriptable interface for firmware and os download. \ref cmdline "  See: xFSTK Command Line Usage"
+   <li>API - Provides a C++ interface to all xFSTK download functionality.  Examples provided within the xFSTK SDK. \ref api "  See: xFSTK Download API Overview"
+   </ul>
+
+    \section intro_sec General Overview
+    \title Intel SoC Provisioning activities are performed via USB connectivity using a host/target configuration.
+    Within the context of a 1st time programming scenario, Intel SoC platforms will boot into a firmware provisoning mode and xFSTK
+    will detect that a device is attached to the system.  Once detection of a target has been made, it is possible
+    for the system operator to begin a firmware provisoning activity.  Subsequent to provisoning firmware it is also
+    possible to wait for the Intel SoC system to re-detect and OS provisioning can be performed.  Note: In situations where the firmware / os update windows is short (on the order of 3 seconds) it is possible to initiate the download process before placing the target into an update mode.  A typical
+    system configuration is as follows:
+
+    \image html xfstkbasicconfig.png
+
+   \brief Windows Note: During manual system provisioning, it is helpful to avoid removing the USB cable from the host machine.
+   Instead remove the micro-usb connector from the target and connect a new one.  Removing the USB cable from the Host machine
+   may result in a need to reinstall Intel SoC provisoning drivers again.  This typically occurs when the USB provisioning
+   cable is moved to a different port on the host machine.
+
+    \section intro_spi_sec General SPI Overview
+    \brief Intel provides SPI flash support on products that support SPI (BYT). The SPI flash support is used to program targets that have corrupted or blank SPI flash devices.
+	This method only supports the firmware provisioning activity and is considered a 1st time programming activity or recovery method. OS downloads are not performed via SPI.
+	The DediProg SF100 programmer provides the connectivity between target and host. In addition to the SF100 programmer, additional software is required by the SF100 as shown below:
+	
+    \image html xfstkbasicspiconfig.png
+	
+   \section interface_sec GUI Interface Details
+   \nfs
+	   \image html xfstkoverview.PNG
+	   
+   \section interface_option_sec GUI Interface Options Details
+   \nfs
+           \image html xfstkoptiongui.PNG
+
+   \section baytrail_interface_sec Baytrail GUI Interface Details
+   \nfs
+           <br>
+	   \image html baytrail_gui.png
+
+
+    \page cmdline Command Line Usage
+
+    \title xFSTK provides a basic commandline interface to enable scripting of provisioning activities.  Within the
+    install folder, the xfstk-dldr-solo binary can be used with the following commandline specification:
+
+    \section examples_cmdline Basic Commandline Details
+
+	<table>
+		<tr>
+			<td><b>Command</b></td>
+			<td><b>Explanation</b></td>
+		</tr>
+		<tr>
+			<td><b>-h [ --help ]</b></td>
+			<td>Print usage message</td>
+		</tr>
+		<tr>
+			<td><b>--fwdnx arg (=BLANK. BIN)</b></td>
+			<td>File path for the FW DNX module</td>
+		</tr>
+		<tr>
+			<td><b>--fwimage arg (=BLANK.bin)</b></td>
+			<td>File path for the FW Image module</td>
+		</tr>
+		<tr>
+			<td><b>--osdnx arg (=BLANK.bin)</b></td>
+			<td>File path for the OS DNX module</td>
+		</tr>
+		<tr>
+			<td><b>--osimage arg (=BLANK.bin)</b></td>
+			<td>File path for the OS image</td>
+		</tr>
+		<tr>
+			<td><b>--softfuse arg (=BLANK.bin)</b></td>
+			<td>File path for the Softfuse Binary</td>
+		</tr>
+		<tr>
+			<td><b>--miscdnx arg</b></td>
+			<td>File path for miscellaneous DNX module</td>
+		</tr>
+		<tr>
+			<td><b>--gpflags arg (=0x80000000)</b></td>
+			<td>Optional argument. 32 Bit Hex Value of the GPFlags.</td>
+		</tr>
+		<tr>
+			<td><b>--debuglevel arg (=0xffffffff)</b></td>
+			<td>Optional argument. 32 bit hex value to set the debuglevel, 0x1800 = LOG_STATUS | LOG_PROGRESS</td>
+		</tr>
+		<tr>
+                        <td><b>--usbdelayms arg (<500)</b></td>
+                        <td>Optional argument. 32 bit int value to set the usbdelayms, default 0ms</td>
+		</tr>
+		<tr>
+			<td><b>--wipeifwi </b></td>
+			<td>Optional argument. Indicate whether to wipe out ifwi image on emmc. Set to false by default</td>
+		</tr>
+		<tr>
+			<td><b>--transfer arg (=USB)</b></td>
+			<td>Optional argument. Determines how the image will be transferred.</td>
+		</tr>
+		<tr>
+			<td><b>--idrq</b></td>
+			<td>
+				<p>Optional argument. Indicates whether IDRQ is used.</p>
+				<p>Tag present means idrq is used, else idrq is not used.</p>
+				<p>The IDRQ payload will be dumped into the --miscbin path</p>
+			</td>
+		</tr>
+		<tr>
+			<td><b>-v [ --verbose ]</b></td>
+			<td>
+				<p>Optional argument. Display debug information.</p>
+			</td>
+		</tr>
+		<tr>
+			<td><b>-r [ --rev ]</b></td>
+			<td>version/revision</td>
+		</tr>
+		<tr>
+			<td><b>--miscbin </b></td>
+			<td>Optional Merrifield Only argument. File path for miscellaneous binary file </td>
+		</tr>
+		<tr>
+			<td><b>--csdb arg (=0)</b></td>
+			<td>
+			<p>Optional argument. Exchange the chaabi specific data block specified in --miscbin par</p>
+			<p>Use the command code of the provision as the input argument.
+			</td>
+		</tr>
+		<tr>
+			<td><b>spi</b></td>
+			<td>Print SPI usage message (BYT products only)</td>
+		</tr>
+
+
+	</table>
+		
+    \section examples_cmdline Basic Commandline Examples
+	<dl>
+    <dt><b>Download Firmware</b></dt>
+        <dd><pre>xfstk-dldr-solo --fwdnx /intel/fwdnx.bin --fwimage /intel/fwimage.bin</pre></dd>
+    <dt><b>Download Operating System</b></dt>
+        <dd><pre>xfstk-dldr-solo --osdnx /intel/osdnx.bin --osimage /intel/osimage.bin --gpflags 80000001</pre></dd>
+    <dt><b>Download Firmware and Operating System</b></dt>
+        <dd><pre>xfstk-dldr-solo --fwdnx /intel/fwdnx.bin --fwimage /intel/fwimage.bin --osdnx /intel/osdnx.bin --osimage /intel/osimage.bin --gpflags 80000001</pre></dd>
+    <dt><b>Wipe Out IFWI On Emmc</b></dt>
+        <dd><pre>xfstk-dldr-solo --fwdnx /intel/fwdnx.bin --fwimage /intel/fwimage.bin --wipeifwi --gpflags 80000000</pre></dd>
+    <dt><b>Dump IDRQ Payload(Merrifield B0)</b></dt>
+		<dd><pre>xfstk-dldr-solo --idrq --miscbin /intel/miscbin.bin</pre></dd>
+    <dt><b>Dump Key Hash</b></dt>
+		<dd><pre>xfstk-dldr-solo hashverify --hashfile /intel/hashfile.bin -w</pre></dd>
+    <dt><b>Perform Key Hash Verification</b></dt>
+        <dd><pre>xfstk-dldr-solo hashverify --hashfile /intel/hashfile.bin</pre></dd>
+    <dt><b>SPI Download Firmware (BYT products)</b></dt>
+        <dd><pre>xfstk-dldr-solo spi --fwimage /intel/fwimage.bin</pre></dd>
+    <dt><b>Perform CSDB Provision: Lifetime Refresh (Merrifield B0)</b></dt>
+        <dd><pre>xfstk-dldr-solo --fwdnx /intel/fwdnx.bin --miscbin /intel/payload.bin --csdb 2</pre></dd>
+ 	</dl>
+
+    \section debuglevel_defines Debug Level Bit Definitions
+    <ul>
+    <li>#define LOG_ACK         0x0001
+    <li>#define LOG_UPDATE      0x0002
+    <li>#define LOG_OPCODE      0x0004
+    <li>#define LOG_FWUPGRADE   0x0008
+    <li>#define LOG_OS          0x0010
+    <li>#define LOG_USB         0x0020
+    <li>#define LOG_SOCKET      0x0040
+    <li>#define LOG_SERIAL      0x0080
+    <li>#define LOG_UTIL        0x0100
+    <li>#define LOG_DOWNLOADER  0x0200
+    <li>#define LOG_ENTRY       0x0400
+    <li>#define LOG_STATUS      0x0800
+    <li>#define LOG_PROGRESS    0x1000
+    <li>#define DEBUG_ERROR     0xfffffff1
+    <li>#define LOG_ALL         0xffffffff
+    </ul>
+
+    \page emmc_dump_guide Secure eMMC Dump Guide
+        \section emmc_purpose Purpose
+
+        \title This document describes the steps to perform a secure eMMC Dump. 
+
+        \section emmc_steps Step-by-Step Guide
+        \nfs
+           \image html emmc_token.png
+
+        Steps to read a token (unique ID) from the device and write it to an unsigned firmware DNX using the xFSTK downloader.
+        <ul> 
+        <li>STEP 1: xFSTK-Downloader - Token Register (refer to diagram above)
+            <ol>
+              <li>Disconnect the phone from the Host PC USB port, and power off the Phone.
+              <li>Using the xFSTK Downloader CLI, run the command:<br>
+                  <b>xfstk-dldr-solo.exe emmcdump -r -u \<unsigned_fwdnx.bin\> -t \<token offset\> -e \<expiration duration\></b> 
+              <li>Immediately connect the phone to the Host PC USB port to register the token to an unsigned DnX.
+            </ol>
+        </ul><br>
+
+<table>
+            
+		<tr>
+			<td><b>unsigned_fwdnx</b></td>
+			<td>Unsigned firmware dnx that to be added with token/expiration time</td>
+		</tr>
+		<tr>
+			<td><b>token offset</b></td>
+			<td>Hex offset in unsigned firmware dnx that to store retrieved token string and its minimum
+                            and maximum expiration time. Default value is 0x108</td>
+		</tr>
+		<tr>
+			<td><b>expiration duration</b></td>
+			<td>Supported format shall be in string starts with a numeric number following by h/d/m/y
+                            (h for hour, d for day, m for month and y for year).
+                            For example, if one provide 17d, it means the token string will expire in 17 days.
+                            If the value of the duration is zero (i.e. 0h, 0d, 0m or 0y),
+                            it means the token will never expire.</td>
+                </tr>
+</table><br><br><br>
+
+        
+        \nfs
+           \image html emmc_signing.png
+     <ul>
+        <li>STEP 2: Customer Signing Utility (refer to diagram above)
+	  <ol>
+            <li>Add the VRL to the unsigned firmware DNX using the Customer Signing Utility.
+ 	  </ol><br>
+     </ul><br><br><br><br><br> 
+     
+
+
+
+     \nfs
+       \image html emmc_cdph.png
+     <ul>
+        <li>STEP 3: xFSTK-Stitcher, Stitch CDPH (refer to diagram above)<br>
+          <ol>
+            <li>Stitch the CDPH to the firmware DNX using the xFSTK-Stitcher.
+            <li>Ensure your config file has the following fields set:<br>
+              <ol>
+                <li><b>PlatformType</b> = MFDD0
+                <li><b>ImageType</b> = FWUSB
+                <li><b>Dnx_Key</b> = ./keys/CRAK_1_public.key
+                <li><b>DnxFile_Input</b> = ./FW_Components/dnx_file_input.bin
+                <li><b>DnxFile_Output</b> = ./dnx_output_file.bin
+                <li><b>DnxKey_Index</b> = 1 <br>
+              
+                    Please note the following description of the fields in the example above:<br>
+                    <b>Dnx_Key</b> is the public key associated with the <b>DnxKey_Index</b> specified.
+                    The key index here is indicative of which of the key indices 0 through 4 is used to hash verify
+                    the image against. The public Key specified for generating CDPH in step 3 should match the public
+                    key specified while signing the DnX in step 2.<br>
+
+                    <b>DnxFile_Input</b> is the INPUT file that is a signed DnX file. In this example
+                    \"./FW_Components/dnx_file_input.bin\" is the input binary.<br>
+
+                    <b>DnxFile_Output</b> is the OUTPUT file that is DnX module with CDPH header. In this example 
+                    \"./dnx_output_file.bin\" is the location of the output file along with the name of the output file.<br>
+                  
+                  <li>Supply the platform file and the config file with the CDPH option that is -C to the xfstk-stitcher as:<br>
+                      <b>xfstk-stitcher  -k \<platform.xml\> -c \<config.txt\> -C</b><br>
+                      Note: The output DnX file as specified in the config now has a VRL header, a token and the CDPH header stitched to it. 
+               </ol>
+           </ol>
+     </ul>
+
+        
+     \nfs
+       \image html emmc_dump.png
+
+     <ul>    
+        <li>STEP 4: xFSTK-Downloader, eMMC Dump (refer to diagram above)<br>
+
+                Download the signed DNX to the device and execute an eMMC Dump. Failure in verifying the unique ID will
+                prevent an eMMC Dump for the user partition.
+
+         <ol>
+           <li>Disconnect the phone from the Host PC USB port, and power off the Phone.
+           <li>Using the xFSTK Downloader CLI, run the command:<br>
+               <b>xfstk-dldr-solo.exe emmcdump -dnx \<signed_fwdnx.bin\> -f \<outfile\> -p \<partition\> -b \<blocksize\> -c \<blockcount\> -o \<offset\></b>
+           <li>Immediately connect the phone to the Host PC USB port to download the dnx and perform an eMMC Dump.
+         </ol>
+     </ul><br>
+
+
+
+    \section dump_commands xFSTK Downloader eMMC Dump Commands
+
+<table>
+		<tr>
+			<td>--r</td>
+			<td><b>Register.</b><br>
+                             Collect a 16 byte ASCII format token which can be used while  stitching  the SMIP </td>
+		</tr>
+		<tr>
+			<td>--file \<filename\> --partition \<partition number\> --blocksize \<block size\> --blockcount \<count\></td>
+			<td><b>Extract</b><br>
+                             Extract count number of blocks of size block size of partition number to file called filename.
+                             Refer to section eMMC Dump Partitions for details. The resulting file is a bin file that needs to be converted to
+                             hex for reading. User partition extract follows secure eMMC dump procedure. DnX must be signed with a embedded token,
+                             which will be compared with internally generated token to verify authenticity of the DnX.</td>
+		</tr>
+		
+</table>
+
+    \section dump_partitions eMMC Dump Partitions
+
+    \title From the context of the emmcdump utility, the term \"partition\" is referring to physical partitions within the eMMC card as defined by
+           eMMC JEDEC JESD84-A441 standard. This standard defines 4 physical partitions: 2 boot partitions, 1 user partition, and 1 eCSD registerbank.
+           The utilization of these physical partitions is application specific.<br>
+
+           The Intel Medfield Platform Architecture utilizes the physical eMMC partitions as follows:
+           <table>
+	     <tr>
+		<td><b>Partition Number </b></td>
+		<td><b>Usage</b></td>
+                <td><b>Details</b></td>
+             </tr>
+	     <tr>
+               <td>0</td>
+               <td>User Partition</td>
+               <td>Holds Intel Firmware defined \"OS Image Profile\", Firmware \"OS Images blobs\" and the Main OS (Android) defined OS Filesystem
+                   (ext2/3/vfat). See Medfield Firmware Architecture Specification (FAS) for more details on OSIP and OS Image blobs. See Android /
+                   Kernel references for Main OS Filesystem.</td>
+             </tr>
+             <tr>
+               <td>1</td>
+               <td>Boot Partition</td>
+               <td>Both Boot partition 1 and 2 hold redundant copies of the Integrated Firmware Image (IFWI) image.</td>
+             </tr>
+             <tr>
+               <td>2</td>
+               <td>Boot Partition</td>
+               <td>Both Boot partition 1 and 2 hold redundant copies of the Integrated Firmware Image (IFWI) image.</td>
+             </tr>
+             <tr>
+               <td>3</td>
+	       <td>ESCD</td>
+             <td>Specifiying this partition will retrieve the \"Extended CSD\" registers of the eMMC Controller. This is a 512 byte binary file that represents
+                     the register setting of the emmc controller\'s \"Extended CSD\" register set as defined by the by JEDEC eMMC standard (JEDEC JESD84-A441).
+                     Please refer the JEDEC JESD84-A441 for more details.</td>
+             </tr>
+           </table>
+
+\page api xFSTK Download API Overview
+
+        \section api_summary xFSTK Download API Summary
+        \title The xfstkdldrapi provides an interface to enable development of custom tools that perform fw/os download.  Single target and multitarget support are built into the library.
+               Multitarget provisioning can be performed in either a single threaded manner or a multithreaded manner.  For xFSTK 1.2.0 Async multithreaded parallel provisioning is
+               supported now for D1 silicon which support unique USB serial number on the device.  Serial multitarget provisioning is only recommended if a very slow and old host is used.  
+		
+		Starting from xFSTK 1.2.2, API will support dynamic load from client app, example code is added to show how
+        to use this feature. 
+		
+		Starting from xFSTK 1.3.0 the libusb driver will be disabled for Windows release, instead a new USB driver 
+		installer based on Jungo USB driver stack is icnluded, it also provided USB port mapping from the driver API so that xFSTK Client 
+		Apps won't need to use WinDDK code to detect the USBSN/Port anymore. 
+		
+		Examples have been provided to enable experimentation 
+		and development.
+
+		\sa \ref api_setup1 \"xFSTK API Setup (Windows XP/7/8)\"
+		\sa \ref api_setup2 \"xFSTK API Setup (Ubuntu 10.04 LTS - Linux)\"
+		\sa \ref xfstkdldrapi \"xFSTK Download API Documentation\"
+                \sa \ref xfstk-dldr-example-serial.cpp \"xfstk-dldr-example-serial.cpp\"
+                \sa \ref xfstk-dldr-example-parallel.cpp \"xfstk-dldr-example-parallel.cpp\"
+                \sa \ref xfstk-dldr-example-parallel-dynamic-load.cpp \"xfstk-dldr-example-parallel-dynamic-load.cpp\"
+
+        \section api_features xFSTK Download API Features
+       <ul>
+       <li>FW Only Download - One shot FW download via USB.
+       <li>OS Only Download - One shot OS download via USB.
+       <li>FW/OS Download - One shot FW/OS download via USB.
+       <li>FW/OS HVM Download - One shot FW/OS Async mode Parallel multi-target download via USB.
+       <li>Status Callback - Register a callback to obtain detailed status updates.
+       <li>User specified retry count - Retry counts for USB I/O errors specified by user.
+       <li>Get available targets - Scan the usb device tree for available SoC targets, provide device port mapping info to client Apps.
+       <li>Dynamic API DLL Load - Provide APIs to dynamically load xFSTK API DLL so that the client Apps don't need to link the lib file.
+       </ul>
+
+        \section api_class xFSTK Download API CLass
+
+        \image html xfstkbareclass.PNG
+
+        \section api_sequence xFSTK Provisioning Sequence (Serial Round Robin)
+
+        \image html xfstkserialseq.PNG
+
+		
+	\page api_setup2 xFSTK API Setup (Ubuntu 10.04 LTS - Linux)
+	
+		xFSTK Supports QT Creator IDE.  Basic instructions for building the included examples under QT Creator are provided below.
+		
+		Along with QT Creator there is one other pre-requisite package callled 'build-essential'.  Both packages can be obtained through the Ubuntu 10.04 Software Center.
+		
+		\image html xfstklinuxqtide.png
+		
+		\image html build-essential.png
+		
+		Begin by copying the xfstksdk.tar.gz file to your home directory.
+		
+		\image html xfstklinuxsdksetup.png
+		
+		Now unpack to obtain the following directory structure.
+		
+		\image html xfstklinuxextracted.PNG
+		
+		Browse into one of the examples to find the QT project file.
+		
+		\image html xfstklinuxproopen.png
+		
+		Now build the project.
+		
+		\image html xfstklinuxbuildqt.PNG
+		
+    \page api_setup1 xFSTK API Setup (Windows XP/7/8)
+
+        xFSTK supports both Visual Studio 2008 and QT Creator IDEs.  Basic instructions for building the included examples under both IDEs are provided below.
+
+        \section api_windows_bkm xFSTK Multitarget Windows Driver Configuration
+
+        In order to enable multi-target provisioning the xFSTK driver must be installed for every USB port that will have a target connected to it.  Follow the procedure below to ensure correct driver installation.
+
+        \image html xfstkwindowsmt.PNG
+
+        \section api_windows_setup Perparing the SDK
+
+        Begin by extracting the xfstk-sdk.zip located in the xFSTK installation folder.
+        \image html xfstksetup.PNG
+
+        Once extracted the following directory tree should be created:
+        \image html xfstkextractedwin.PNG
+
+        QT Version Information (Changes to include / lib paths may be required for newer QT versions)
+        \image html xfstkqtabout.PNG
+		
+		QT Creator can be obtained at the official Nokia website:
+		
+		http://qt.nokia.com/
+
+        QT Projects can be found in the mingw subdirectory:
+
+        \image html xfstkqtprojectopen.PNG
+
+        Once you have opened the project you can build the solution.
+
+        \image html xfstkideqt.PNG
+
+        Visual Studio Version Information
+
+        \image html xfstkvsabout.PNG
+		
+		QT Visual Studio Plugin is recommended:
+		
+		http://qt.nokia.com/downloads/visual-studio-add-in
+
+        Visual studio projects can be found in the msvc subdirectory.
+
+        \image html xfstkvsprojectopen.PNG
+
+        Once you have opened the project you can build the solution.
+
+        \image html xfstkvside.PNG
+
+	\page opensource_libs Opensource Libraries and Tools
+	
+            Parts of this software use of the following opensource libraries and tools:
+
+                Library: Qt, License: Lesser General Public License (LGPL) (version 2.1)
+                Website: http://qt.nokia.com/
+
+                Library: Boost, License: Boost Software License
+                Website: http://www.boost.org/      
+
+                Library: Open Icon Library , License: LGPL or PD
+                Website: http://openiconlibrary.sourceforge.net/
+
+                Library: flashrom, License: GNU General Public License version 2
+                Website: http://flashrom.org/Flashrom
+
+                Documentation: Doxygen
+                Website: http://www.stack.nl/~dimitri/doxygen/
+
+                Installer: InnoSetup
+                Website: http://www.jrsoftware.org/isinfo.php
+
+                Installer: Xfstk Downloader Tool, License: LGPL
+                Website: http://www.gnu.org/licenses/lgpl-2.1.txt
+
+                Installer: DediProg SF100 downloader SW
+                © 2006-2009 Dediprog Technology, CO., Ltd . All Rights Reserved.
+                Website: http://www.dediprog.com/home
+
+    \page manu Manufacturing Recommendations
+
+	\section reduce_host_load Reduce Load on Provisioning Hosts
+
+	Our testing has indicated that response times for detecting SoC targets can be delayed when the host machine is under 
+	heavy load, such as during a virus scan. Hosts used for provisioning should have minimal system load while provisioning
+	to ensure the fastest response time from the host's operating system.
+
+	\section powered_hubs Use High Speed Ports and Powered Hubs
+
+	Intel SoC devices are hi-speed USB 2.0 devices. Firmware and OS provisioning should be done through hi-speed
+	ports on the provisioning host. If USB hubs are used they should also be hi-speed USB 2.0 devices and be powered
+	by an external power supply. Recomend to use the white SSK 7 ports high speed hub. 
+
+	
+	\section high_speed_usb_card Use High Speed PCI-E USB Cards
+
+	Our testing has indicated that provisioning is highly reliable when using quality high speed PCI-E USB cards for HVM firmware and OS provisioning. 
+    Recomend to use Starteck PEXUSB400 4 ports PCI-E card. 
+	
+	\section Good_power_supply Use Good External Power Supply
+	
+	Good power supply is required to power the SoU device during HVM manufacturing, it need to have suffient maximum current
+    for each SoU device at least 1.5A.  Recomend to use Agilent E3614A or similar and better to use one power for each SoC device.   
+
+	\section provide_feedback Provide Feedback
+
+	xFSTK is being actively developed to support Intel SoC products. Please help us to improve your business by providing
+	feedback on how you are currently using and want to use xFSTK.
+
+
+
+
+*/

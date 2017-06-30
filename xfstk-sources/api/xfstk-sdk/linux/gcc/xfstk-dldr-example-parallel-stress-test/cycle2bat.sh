@@ -1,0 +1,34 @@
+#!/bin/sh
+
+curl http://admin:1234@192.168.0.100/outlet?1=ON
+curl http://admin:1234@192.168.0.100/outlet?1=CCL
+# curl http://admin:1234@192.168.0.100/outlet?2=ON
+# curl http://admin:1234@192.168.0.100/outlet?2=CCL
+# curl http://admin:1234@192.168.0.100/outlet?3=ON
+# curl http://admin:1234@192.168.0.100/outlet?3=CCL
+curl http://admin:1234@192.168.0.100/outlet?4=ON
+curl http://admin:1234@192.168.0.100/outlet?4=CCL
+curl http://admin:1234@192.168.0.100/outlet?5=ON
+curl http://admin:1234@192.168.0.100/outlet?5=CCL
+# curl http://admin:1234@192.168.0.100/outlet?6=ON
+# curl http://admin:1234@192.168.0.100/outlet?6=CCL
+# curl http://admin:1234@192.168.0.100/outlet?7=ON
+# curl http://admin:1234@192.168.0.100/outlet?7=CCL
+curl http://admin:1234@192.168.0.100/outlet?8=ON
+curl http://admin:1234@192.168.0.100/outlet?8=CCL
+curl http://admin:1234@192.168.0.100/outlet?1=ON
+curl http://admin:1234@192.168.0.100/outlet?1=CCL
+# curl http://admin:1234@192.168.0.100/outlet?2=ON
+# curl http://admin:1234@192.168.0.100/outlet?2=CCL
+# curl http://admin:1234@192.168.0.100/outlet?3=ON
+# curl http://admin:1234@192.168.0.100/outlet?3=CCL
+curl http://admin:1234@192.168.0.100/outlet?4=ON
+curl http://admin:1234@192.168.0.100/outlet?4=CCL
+curl http://admin:1234@192.168.0.100/outlet?5=ON
+curl http://admin:1234@192.168.0.100/outlet?5=CCL
+# curl http://admin:1234@192.168.0.100/outlet?6=ON
+# curl http://admin:1234@192.168.0.100/outlet?6=CCL
+# curl http://admin:1234@192.168.0.100/outlet?7=ON
+# curl http://admin:1234@192.168.0.100/outlet?7=CCL
+curl http://admin:1234@192.168.0.100/outlet?8=ON
+curl http://admin:1234@192.168.0.100/outlet?8=CCL

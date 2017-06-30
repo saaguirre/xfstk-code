@@ -1,0 +1,4 @@
+?package(ubucompilator):needs="X11" section "Applications/Programming"\
+title="xfstk"\
+command="/usr/bin/xfstk-ui-launcher.sh"\
+icon="/usr/share/pixmaps/xfstklogo.png"

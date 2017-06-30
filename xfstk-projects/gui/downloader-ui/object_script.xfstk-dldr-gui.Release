@@ -1,0 +1,12 @@
+INPUT(
+./..\..\..\xfstk-build\temp\release\obj\downloader-ui\main.o
+./..\..\..\xfstk-build\temp\release\obj\downloader-ui\xfstkdldrgui.o
+./..\..\..\xfstk-build\temp\release\obj\downloader-ui\xfstkdldrpluginabstractor.o
+./..\..\..\xfstk-build\temp\release\obj\downloader-ui\xfstksettingsdialog.o
+./..\..\..\xfstk-build\temp\release\obj\downloader-ui\xfstkaboutdialog.o
+./..\..\..\xfstk-build\temp\release\obj\downloader-ui\moc_xfstkdldrgui.o
+./..\..\..\xfstk-build\temp\release\obj\downloader-ui\moc_xfstkdldrpluginabstractor.o
+./..\..\..\xfstk-build\temp\release\obj\downloader-ui\moc_xfstksettingsdialog.o
+./..\..\..\xfstk-build\temp\release\obj\downloader-ui\moc_xfstkaboutdialog.o
+./..\..\..\xfstk-build\temp\release\obj\downloader-ui\qrc_xfstkresources.o
+);

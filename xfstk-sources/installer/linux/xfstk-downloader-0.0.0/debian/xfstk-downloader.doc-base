@@ -1,0 +1,20 @@
+Document: xfstk-downloader
+Title: xfstk-downloader Manual
+Author: <insert document author here>
+Abstract: This manual describes what xfstk is
+ and how it can be used to
+ manage online manuals on Debian systems.
+Section: Programming
+
+Format: debiandoc-sgml
+Files: /usr/share/doc/xfstk/xfstk.sgml.gz
+
+Format: postscript
+Files: /usr/share/doc/xfstk/xfstk.ps.gz
+
+Format: text
+Files: /usr/share/doc/xfstk/xfstk.text.gz
+
+Format: HTML
+Index: /usr/share/doc/xfstk/html/index.html
+Files: /usr/share/doc/xfstk/html/*.html
