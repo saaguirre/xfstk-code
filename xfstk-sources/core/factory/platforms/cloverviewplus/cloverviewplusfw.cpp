@@ -127,8 +127,8 @@ CloverviewPlusFW::~CloverviewPlusFW()
    }
 }
 
-bool CloverviewPlusFW::Init(char* fname_dnx_fw, char* fname_fw_image,
-                      CloverviewPlusUtils* utils, unsigned long gpflags, bool enable_ifwi_wipe)
+bool CloverviewPlusFW::Init(char* fname_dnx_fw, char* fname_fw_image, CloverviewPlusUtils* utils,
+             unsigned long gpflags, bool enable_ifwi_wipe, bool perform_emmc_dump)
 {
     bool ret = true;
     m_utils = utils;
@@ -149,14 +149,27 @@ bool CloverviewPlusFW::Init(char* fname_dnx_fw, char* fname_fw_image,
 
     ret = CheckFile(fname_dnx_fw);
     if(!ret)
+    {
         return false;
+    }
+    else
+    {
+        m_fname_dnx_fw = fname_dnx_fw;
+    }
 
-    ret = CheckFile(fname_fw_image);
-    if(!ret)
-        return false;
+    if(!perform_emmc_dump)
+    {
+        ret = CheckFile(fname_fw_image);
+        if(!ret)
+        {
+            return false;
+        }
+        else
+        {
+            m_fname_fw_image = fname_fw_image;
+        }
+    }
 
-    m_fname_dnx_fw = fname_dnx_fw;
-    m_fname_fw_image = fname_fw_image;
 
     ret = InitDnxHdr();
     if(!ret)
@@ -166,9 +179,14 @@ bool CloverviewPlusFW::Init(char* fname_dnx_fw, char* fname_fw_image,
     if(!ret)
         return false;
 
-    ret = InitFwImage(enable_ifwi_wipe);
-    if(!ret)
-        return false;
+    if(!perform_emmc_dump)
+    {
+        ret = InitFwImage(enable_ifwi_wipe);
+        if(!ret)
+        {
+            return false;
+        }
+    }
 
     fw_data_set[FW_DATA_RUPHS]->size = 4;
     fw_data_set[FW_DATA_RUPHS]->data = (unsigned char*)&m_fw_update_profile_hdr_size;
@@ -197,13 +215,15 @@ bool CloverviewPlusFW::Init(char* fname_dnx_fw, char* fname_fw_image,
     fw_data_set[FW_DATA_IFW3]->size = NINETY_SIX_KB;
     fw_data_set[FW_DATA_IFW3]->data = m_third_96kb;
 
-	//Set the ifwi content to zero here if user ask to wipe out ifwi on emmc
-	if(enable_ifwi_wipe) {
-		for(int i = 2; i <= FW_DATA_IFW3; i++) {
-		   if(fw_data_set[i]->data)
-			   memset(fw_data_set[i]->data, 0, fw_data_set[i]->size);
-	   }
-	}
+    //Set the ifwi content to zero here if user ask to wipe out ifwi on emmc
+    if(enable_ifwi_wipe)
+    {
+        for(int i = 2; i <= FW_DATA_IFW3; i++)
+        {
+            if(fw_data_set[i]->data)
+                memset(fw_data_set[i]->data, 0, fw_data_set[i]->size);
+        }
+    }
 
     fw_data_set[FW_DATA_DNXH_CLOVERVIEWPLUS]->size = m_dnx_fw_header_size;
     fw_data_set[FW_DATA_DNXH_CLOVERVIEWPLUS]->data = m_dnx_fw_size_hdr;

@@ -187,11 +187,7 @@ bool XfstkDownloader::ParseCommandline(int argc, char* argv[])
 
     if(argc>1)
     {
-        if(!strcmp(argv[1],"emmcdump"))
-        {
-            this->expandedOptions = EMMC_DUMP;
-        }
-        else if(!strcmp(argv[1],"spi"))
+        if(!strcmp(argv[1],"spi"))
         {
             this->expandedOptions = BAYTRAIL;
         }
@@ -212,7 +208,7 @@ bool XfstkDownloader::ParseCommandline(int argc, char* argv[])
         return true;
     }
     else {
-        this->xfstkoptions = this->xfstkfactory->CreateDownloaderOptions(MEDFIELD);
+        this->xfstkoptions = this->xfstkfactory->CreateDownloaderOptions(MERRIFIELD);
         if(this->xfstkoptions)
         {
             this->xfstkoptions->Parse(argc,argv);

@@ -51,12 +51,22 @@
 // Serial Start
 #define SERIAL_START       0x536F5478ULL      // Serial     'SoTx'
 
+// EMMC
+#define BULK_ACK_RDY$               0x52445924ULL        // 'RDY$'
+#define EMMC_DUMP_ACK               0x2441434BULL        // '$ACK'
+#define EMMC_DUMP_NACK              0x4E41434BULL        // 'NACK'
+#define EMMC_DUMP_ECSD              0x45435344ULL        // 'ECSD'
+#define EMMC_DUMP_SPR$              0x53505224ULL        // 'SPR$'
+#define EMMC_DUMP_REQB              0x52455142ULL        // 'REQB'
+#define EMMC_DUMP_EOIO              0x454F494FULL        // 'EOIO'
+#define EMMC_DUMP_NOSN              0x4E4F534EULL        // 'NOSN'
+
 // FW/OS Preambles
 #define PREAMBLE_DNER      0x52456E44ULL      // FW/OS      'DnER'
 #define PREAMBLE_IDRQ      0x51524449ULL      // FW/OS      'IDRQ'
+
 // New BCH preamble
 #define PREAMBLE_BMRQ      0x51524D42ULL      // BMRQ       'BMRQ'
-
 
 // BATI battery status preambles
 #define PREAMBLE_DBDS      0x53444244ULL      // BATI       'DBDS'
@@ -106,6 +116,13 @@
 #define BULK_ACK_ER21		        0x45523231ULL        // 'ER21'
 #define BULK_ACK_ER22		        0x45523232ULL        // 'ER22'
 #define BULK_ACK_ER25		        0x45523235ULL        // 'ER25'
+#define BULK_ACK_ER40               0x45523430ULL        //ER40 – Initialize eMMC HW and Card failed
+#define BULK_ACK_ER41               0x45523431ULL        //ER41 – Error response to “REQB” in case failure reading from eMMC or invalid block size
+#define BULK_ACK_ER42               0x45523432ULL        //ER42 – Error response to “SPR$” in case partition access is not allowed
+#define BULK_ACK_ER43               0x45523433ULL        //ER43 – Error response to “SPR$” in case access token mismatched
+#define BULK_ACK_ER44               0x45523434ULL        //ER44 – Error response to “SPR$” in case access token has expired
+#define BULK_ACK_ER45               0x45523435ULL        //ER45 – Error response to “SPR$” in case failure during eMMC partition switching
+#define BULK_ACK_ER46               0x45523436ULL        //ER46 – Error response to “ECSD” in case failure reading ext CSD from eMMC
 #define BULK_ACK_ERRR		        0x45525252ULL        // 'ERRR'
 #define BULK_ACK_ERB0		        0x45524230ULL        // 'ERB0'
 #define BULK_ACK_ERB1		        0x45524231ULL        // 'ERB1'
@@ -119,7 +136,7 @@
 #define BULK_ACK_EOIU			0x454F4955ULL		  // 'EOIU'
 
 // Max number of the BULK_ACK_XXXX code
-#define MAX_ACK_CODE_CLOVERVIEWPLUS     58
+#define MAX_ACK_CODE_CLOVERVIEWPLUS     59
 
 /*
  * Changing MAX_ERROR_CODE to MAX_ERROR_CODE_CLOVERVIEWPLUS to fix

@@ -94,7 +94,10 @@ SET(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST
 # Produce packages only for the distro we are building on. So, Fedora will build fedora packages and
 # Ubuntu will build Ubuntu packages.
 IF (NOT DEFINED ENV{DISTRIBUTION_NAME})
-  MESSAGE(FATAL_ERROR "ERROR: Environment variable: DISTRIBUTION_NAME is NOT set!")
+  # Set up dependencies per OS. The version numbers are weird. I wonder how ubuntu3 will evaluate to a number.
+    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libboost-program-options1.46.1 (>= 1.46.1-7ubuntu3), libusb-0.1-4 (>= 2:0.1.12-20)") 
+    #add ubuntu 12.04 deps rules here.
+    SET(CPACK_GENERATOR ${CPACK_GENERATOR};DEB)
 ELSE()
   MESSAGE("+++ Creating package for $ENV{DISTRIBUTION_NAME}")
 

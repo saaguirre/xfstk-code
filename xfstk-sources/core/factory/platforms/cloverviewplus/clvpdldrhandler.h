@@ -248,4 +248,72 @@ class ClvpErHandleERRR: public IBaseVisitable<>
 public:
     ADD_ACCEPT_FUNC()
 };
+//start emmc
+class ClvpStEmmcDumpTransfer: public IBaseVisitable<>
+{
+public:
+    ADD_ACCEPT_FUNC()
+};
+
+class ClvpEmmcDump$ACK: public IBaseVisitable<>
+{
+public:
+    ADD_ACCEPT_FUNC()
+};
+
+class ClvpEmmcDumpNACK: public IBaseVisitable<>
+{
+public:
+    ADD_ACCEPT_FUNC()
+};
+
+class ClvpEmmcDumpECSD: public IBaseVisitable<>
+{
+public:
+    ADD_ACCEPT_FUNC()
+};
+
+class ClvpEmmcDumpSPR$: public IBaseVisitable<>
+{
+public:
+    ADD_ACCEPT_FUNC()
+};
+
+class ClvpEmmcDumpREQB: public IBaseVisitable<>
+{
+public:
+    ADD_ACCEPT_FUNC()
+};
+
+class ClvpEmmcDumpEOIO: public IBaseVisitable<>
+{
+public:
+    ADD_ACCEPT_FUNC()
+};
+
+class ClvpEmmcDumpFwHandleDFRM: public IBaseVisitable<>
+{
+public:
+    ADD_ACCEPT_FUNC()
+};
+
+class ClvpEmmcDumpStHandleFwNormal: public IBaseVisitable<>
+{
+public:
+    ADD_ACCEPT_FUNC()
+};
+
+class ClvpEmmcDumpRDY$: public IBaseVisitable<>
+{
+public:
+    ADD_ACCEPT_FUNC()
+};
+
+class ClvpEmmcDumpER40: public IBaseVisitable<>
+{
+public:
+    ADD_ACCEPT_FUNC()
+};
+// end emmc
+
 #endif // FWDLDRHANDLER_H

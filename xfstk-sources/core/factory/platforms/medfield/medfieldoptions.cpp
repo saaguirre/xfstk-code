@@ -91,7 +91,19 @@ void MedfieldOptions::Parse(int argc, char* argv[])
             ("initcsdb",   po::value<std::string>()->default_value("1"), "Send the first CSDB of a sequence")
             ("finalcsdb",  po::value<std::string>()->default_value("1"), "Send the last CSDB of a sequence")
             ("miscbin",    po::value<std::string>()->default_value("BLANK.bin"), "File path for micellaneous binary file")
-            ("softfuse",   po::value<std::string>()->default_value("BLANK.bin"), "Softfuse Path");
+            ("softfuse",   po::value<std::string>()->default_value("BLANK.bin"), "Softfuse Path")
+            ("emmcdump",   po::bool_switch()->default_value(0), "Optional argument. Indicate whether to perform an emmc dump. Set to false by default")
+            ("file",       po::value<string>(), "Output file name")
+            ("partition",  po::value<int>(), "0 - user partition; 1- boot partition-1; 2 - boot partition-2;3 - E-CSD")
+            ("blocksize",  po::value<long>(), "size of blocks to read (applicable for partitions 0-2)")
+            ("blockcount", po::value<long>(), "number of blocks to read (applicable for partitions 0-2)")
+            ("offset,o",   po::value<long>(), "offset from base of partition to begin reading (applicable for partitions 0-2)")
+            ("register",   po::bool_switch()->default_value(0), "Register Token.")
+            ("ufwdnx,u",   po::value<std::string>()->default_value("BLANK.bin"), "Unsigned DnX.")
+            ("tokenoffset,t",        po::value<string>(), "Token offset for the unsigned DnX. (Default offset: 0x0108)")
+            ("expirationduration,e", po::value<string>(), "Time duration of the token to be valid. Supported format shall be a string which starts with a numeric number followed by h/d/m/y (h for hour, d for day, m for month and y for year)")
+            ("umipdump",   po::bool_switch()->default_value(0), "UMIP dumping. Default value 0 (disable). Set to 1 to enable.")
+            ;
     cmdlineOptions.add(primaryOptions);
 
 
@@ -129,6 +141,53 @@ void MedfieldOptions::Parse(int argc, char* argv[])
             this->isActionRequired = false;
             return;
         }
+        //start emmc args
+        if(vm.count("emmcdump"))
+        {
+            this->performEmmcDump = vm["emmcdump"].as<bool>();
+            this->isActionRequired = true;
+        }
+        if(vm.count("register"))
+        {
+            this->m_isRegisterToken = vm["register"].as<bool>();
+        }
+        if(vm.count("file"))
+        {
+            this->file = vm["file"].as<string>();
+        }
+        if(vm.count("ufwdnx"))
+        {
+            this->uFwDnx = vm["ufwdnx"].as<string>();
+        }
+        if(vm.count("partition"))
+        {
+            this->partition = vm["partition"].as<int>();
+        }
+        if(vm.count("blocksize"))
+        {
+            this->blockSize = vm["blocksize"].as<long>();
+        }
+        if(vm.count("blockcount"))
+        {
+            this->blockCount = vm["blockcount"].as<long>();
+        }
+        if(vm.count("offset"))
+        {
+            this->offset = vm["offset"].as<long>();
+        }
+        if(vm.count("tokenoffset"))
+        {
+            this->tokenOffset = vm["tokenoffset"].as<string>();
+        }
+        if(vm.count("expirationduration"))
+        {
+            this->expirationDuration = vm["expirationduration"].as<string>();
+        }
+        if(vm.count("umipdump"))
+        {
+            this->umipdump = vm["umipdump"].as<bool>();
+        }
+        //end emmc args
 
         if(vm.count("fwdnx"))
         {
@@ -254,7 +313,7 @@ void MedfieldOptions::Parse(int argc, char* argv[])
             this->isActionRequired = !rev & this->isActionRequired;
         }
 
-        if(!this->downloadFW && !this->downloadOS && !this->idrqEnabled && !(csdbStatus != " ") && !rev)
+        if(!this->downloadFW && !this->downloadOS && !this->idrqEnabled && !(csdbStatus != " ") && !(this->performEmmcDump==true) && !rev)
         {
             throw MedfieldOptionsExceptions("Input ingredient mismatch!!!");
         }
@@ -278,7 +337,6 @@ void MedfieldOptions::Parse(int argc, char* argv[])
         cout << "  spi                            Print SPI usage message" << endl;
         this->isActionRequired = false;
     }
-
 }
 
 /** Restores all options to their default values
@@ -558,7 +616,7 @@ inline void MedfieldOptions::UpdateFlags()
     this->downloadOS = (this->osDnxPath.compare("BLANK.bin") && this->osImagePath.compare("BLANK.bin"));
     bool idrq = this->idrqEnabled && (this->miscBinPath.compare("BLANK.bin") != 0);
     bool csdb = (this->csdbStatus != " " );
-    this->isActionRequired = (this->downloadFW || this->downloadOS || idrq || csdb);
+    this->isActionRequired = (this->downloadFW || this->downloadOS || idrq || csdb || this->performEmmcDump);
 }
 
 /** \brief Assembles the current state of all options

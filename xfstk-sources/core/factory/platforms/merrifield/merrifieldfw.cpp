@@ -113,7 +113,8 @@ MerrifieldFW::~MerrifieldFW()
 
 }
 
-bool MerrifieldFW::Init(char *fname_dnx_fw, char *fname_fw_image, char* fname_miscbin, string csdbStatus, MerrifieldUtils *utils, unsigned long gpflags, bool enable_ifwi_wipe)
+bool MerrifieldFW::Init(char *fname_dnx_fw, char *fname_fw_image, char* fname_miscbin, string csdbStatus,
+                        MerrifieldUtils *utils, unsigned long gpflags, bool enable_ifwi_wipe, bool perform_emmc_dump)
 {
     bool ret = true;
     m_utils = utils;
@@ -134,23 +135,33 @@ bool MerrifieldFW::Init(char *fname_dnx_fw, char *fname_fw_image, char* fname_mi
 
     ret = CheckFile(fname_dnx_fw);
     if(!ret)
-        return false;
-
-    ret = CheckFile(fname_fw_image);
-    if(!ret && (csdbStatus == " "))
-        return false;
-
-
-    m_fname_dnx_fw = fname_dnx_fw;
-    m_fname_fw_image = fname_fw_image;
-    m_fname_bin_misc = fname_miscbin;
-
-    if(std::string(m_fname_bin_misc) != "BLANK.bin")
     {
-        if(!CheckFile(fname_miscbin))
-            return false;
+        return false;
+    }
+    else
+    {
+        m_fname_dnx_fw = fname_dnx_fw;
     }
 
+    if(!perform_emmc_dump)
+    {
+        ret = CheckFile(fname_fw_image);
+        if(!ret && (csdbStatus == " "))
+        {
+            return false;
+        }
+        else
+        {
+            m_fname_fw_image = fname_fw_image;
+        }
+
+        m_fname_bin_misc = fname_miscbin;
+        if(std::string(m_fname_bin_misc) != "BLANK.bin")
+        {
+            if(!CheckFile(fname_miscbin))
+                return false;
+        }
+    }
 
     ret = InitDnxHdr();
     if(!ret)
@@ -158,12 +169,16 @@ bool MerrifieldFW::Init(char *fname_dnx_fw, char *fname_fw_image, char* fname_mi
 
     ret = InitDnx();
     if(!ret)
+
         return false;
-    if(std::string(fname_fw_image) != "BLANK.bin")
+    if(!perform_emmc_dump)
     {
-        ret = InitFwImage(enable_ifwi_wipe);
-        if(!ret)
-            return false;
+        if(std::string(fname_fw_image) != "BLANK.bin")
+        {
+            ret = InitFwImage(enable_ifwi_wipe);
+            if(!ret)
+                return false;
+        }
     }
     //if there is no footer, the FUPH does not get flashed
     if(!m_footer_size)
@@ -187,7 +202,6 @@ bool MerrifieldFW::Init(char *fname_dnx_fw, char *fname_fw_image, char* fname_mi
             fw_data_set[FW_DATA_CSDB]->size = m_csdb_size;
             fw_data_set[FW_DATA_CSDB]->data = m_csdb;
         }
-
     }
 
     fw_data_set[FW_DATA_RUPHS]->size = 4;

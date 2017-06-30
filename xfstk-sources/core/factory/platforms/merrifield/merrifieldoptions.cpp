@@ -18,6 +18,7 @@
 #include "merrifieldoptions.h"
 #include <iostream>
 #include <fstream>
+#include "../../common/scoped_file.h"
 
 namespace po = boost::program_options;
 
@@ -47,6 +48,7 @@ void MerrifieldOptions::Parse(int argc, char* argv[])
     string gpflagsHexFormat = "";
     string targetHexFormat = "";
     string usbdelayms = "";
+    bool rev = false;
 
     variables_map vm;
     options_description primaryOptions("Command Line Options");
@@ -59,8 +61,7 @@ void MerrifieldOptions::Parse(int argc, char* argv[])
     ("fwimage", po::value<std::string>()->default_value("BLANK.bin"), "File path for the FW Image module")
     ("osdnx",   po::value<std::string>()->default_value("BLANK.bin"), "File path for the OS DNX module")
     ("osimage", po::value<std::string>()->default_value("BLANK.bin"), "File path for the OS image")
-    ("miscdnx",    po::value<std::string>(),  "File path for miscellaneous DNX module")
-    ("miscbin",    po::value<std::string>()->default_value("BLANK.bin"), "File path for micellaneous binary file")
+    ("miscdnx",    po::value<std::string>(), "File path for miscellaneous DNX module")
     ("gpflags",    po::value<std::string>()->default_value(""), "Optional argument. 32 Bit Hex Value of the GPFlags. For example, 0x80000000")
     ("debuglevel", po::value<std::string>()->default_value("0xffffffff"), "Optional argument. 32 Bit Hex Value of the debuglevel, LOG_STATUS | LOG_PROGRESS")
     ("usbdelayms", po::value<std::string>()->default_value("0"), "Optional argument. 32 Bit int Value of the usbdelayms, default 0ms")
@@ -68,9 +69,23 @@ void MerrifieldOptions::Parse(int argc, char* argv[])
     ("transfer",   po::value<std::string>()->default_value("USB"), "Optional argument. Determines how the image will be transferred.")
     ("idrq",       po::bool_switch()->default_value(0), "Optional argument. Indicates whether IDRQ is used. 1 means idrq is used, 0 means idrq is not used.")
     ("verbose,v",  po::bool_switch()->default_value(0), "Optional argument. Display debug information.")
-    ("csdb",       po::value<std::string>()->default_value(" "), "Optional argument. Enable Chaabi specific data block, specify op code as argument parameter.")
-    ("initcsdb",   po::value<std::string>()->default_value("1"), "Send the first CSDB of a sequence")
-    ("finalcsdb",  po::value<std::string>()->default_value("1"), "Send the last CSDB of a sequence")
+    ("rev,r",      po::bool_switch()->default_value(0), "Optional argument. Display current version/revision.")
+    ("softfuse",   po::value<std::string>()->default_value("BLANK.bin"), "CLVP only - File path for the Softfuse binary")
+    ("emmcdump",   po::bool_switch()->default_value(0), "CLVP/MOFD only - Optional argument. Indicate whether to perform an emmc dump. Set to false by default")
+    ("file,f",     po::value<string>(), "CLVP/MOFD eMMc - Output file name")
+    ("partition,p",po::value<int>(), "CLVP/MOFD only eMMc - 0 - user partition; 1- boot partition-1; 2 - boot partition-2;3 - E-CSD")
+    ("blocksize,b",po::value<long>(), "CLVP/MOFD only eMMc - size of blocks to read (applicable for partitions 0-2)")
+    ("blockcount,c",po::value<long>(), "CLVP/MOFD only eMMc -number of blocks to read (applicable for partitions 0-2)")
+    ("offset,o",   po::value<long>(), "CLVP/MOFD only eMMc - offset from base of partition to begin reading (applicable for partitions 0-2)")
+    ("register",   po::bool_switch()->default_value(0), "CLVP/MOFD only eMMc - Register Token.")
+    ("ufwdnx,u",   po::value<std::string>()->default_value("BLANK.bin"), "CLVP/MOFD only eMMc - Unsigned DnX.")
+    ("tokenoffset,t",   po::value<string>(), "CLVP/MOFD only eMMc - Token offset for the unsigned DnX. (Default offset: 0x0108)")
+    ("expirationduration,e", po::value<string>(), "CLVP/MOFD only eMMc - Time duration of the token to be valid. Supported format shall be a string which starts with a numeric number followed by h/d/m/y (h for hour, d for day, m for month and y for year)")
+    ("umipdump",           po::bool_switch()->default_value(0), "CLVP/MOFD only - UMIP dumping. Default value 0 (disable). Set to 1 to enable.")
+    ("csdb",       po::value<std::string>()->default_value(" "), "MERR/MOFD only - Optional argument. Enable Chaabi specific data block, specify op code as argument parameter.")
+    ("initcsdb",   po::value<std::string>()->default_value("1"), "MERR/MOFD only - Send the first CSDB of a sequence")
+    ("finalcsdb",  po::value<std::string>()->default_value("1"), "MERR/MOFD only - Send the last CSDB of a sequence")
+    ("miscbin",    po::value<std::string>()->default_value("BLANK.bin"), "MERR/MOFD only - File path for micellaneous binary file")
     ;
 
     options_description cmdlineOptions;
@@ -86,15 +101,11 @@ void MerrifieldOptions::Parse(int argc, char* argv[])
 
     options_description visibleOptions;
     visibleOptions.add(primaryOptions);
-
-    primaryOptions.add_options()
-            ("softfuse",  po::value<std::string>()->default_value("BLANK.bin"), "Softfuse Path");
     cmdlineOptions.add(primaryOptions);
 
     try
     {
         store(parse_command_line(argc, argv, cmdlineOptions), vm);
-
         if(vm.count("verbose"))
         {
             this->isVerbose = vm["verbose"].as<bool>();
@@ -115,7 +126,58 @@ void MerrifieldOptions::Parse(int argc, char* argv[])
             this->isActionRequired = false;
             return;
         }
-
+        //start emmc args
+        if(vm.count("emmcdump"))
+        {
+            this->performEmmcDump = vm["emmcdump"].as<bool>();
+            this->wipeifwi = false;
+            this->isActionRequired = true;
+        }
+        if(vm.count("register"))
+        {
+            this->m_isRegisterToken = vm["register"].as<bool>();
+        }
+        if(vm.count("file"))
+        {
+            this->file = vm["file"].as<string>();
+        }
+        if(vm.count("ufwdnx"))
+        {
+            this->uFwDnx = vm["ufwdnx"].as<string>();
+        }
+        if(vm.count("partition"))
+        {
+            this->partition = vm["partition"].as<int>();
+        }
+        if(vm.count("blocksize"))
+        {
+            this->blockSize = vm["blocksize"].as<long>();
+        }
+        if(vm.count("blockcount"))
+        {
+            this->blockCount = vm["blockcount"].as<long>();
+        }
+        if(vm.count("offset"))
+        {
+            this->offset = vm["offset"].as<long>();
+        }
+        if(vm.count("tokenoffset"))
+        {
+            this->tokenOffset = vm["tokenoffset"].as<string>();
+        }
+        if(vm.count("expirationduration"))
+        {
+            this->expirationDuration = vm["expirationduration"].as<string>();
+        }
+        if(vm.count("umipdump"))
+        {
+            this->umipdump = vm["umipdump"].as<bool>();
+        }
+        //end emmc args
+        if(vm.count("softfuse"))
+        {
+            this->SoftfusesPath = vm["softfuse"].as<string>();
+        }
         if(vm.count("fwdnx"))
         {
             this->fwDnxPath = vm["fwdnx"].as<string>();
@@ -245,6 +307,12 @@ void MerrifieldOptions::Parse(int argc, char* argv[])
             }
         }
 
+        if(vm.count("rev"))
+        {
+            rev = vm["rev"].as<bool>();
+            this->isActionRequired = !rev & this->isActionRequired;
+        }
+
 #if defined UNITTEST
         if(vm.count("unittest"))
         {
@@ -254,6 +322,7 @@ void MerrifieldOptions::Parse(int argc, char* argv[])
             this->PrintAllOptions();
         }
 #endif
+
     }
     catch(exception& e)
     {
@@ -573,7 +642,7 @@ inline void MerrifieldOptions::UpdateFlags()
     this->downloadOS = (this->osDnxPath.length() > 0 && this->osImagePath.length() > 0);
     bool idrq = this->idrqEnabled && (this->miscBinPath.compare("BLANK.bin") != 0);
     bool csdb = (this->csdbStatus != " " );
-    this->isActionRequired = (this->downloadFW || this->downloadOS || idrq || csdb);
+    this->isActionRequired = (this->downloadFW || this->downloadOS || idrq || csdb || this->performEmmcDump);
 }
 
 /** \brief Assembles the current state of all options

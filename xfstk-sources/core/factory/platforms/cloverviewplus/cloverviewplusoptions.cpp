@@ -18,6 +18,7 @@
 #include "cloverviewplusoptions.h"
 #include <cstdio>
 #include <iostream>
+#include "../../common/scoped_file.h"
 
 namespace po = boost::program_options;
 
@@ -68,6 +69,17 @@ void CloverviewPlusOptions::Parse(int argc, char* argv[])
     ("transfer",   po::value<std::string>()->default_value("USB"), "Optional argument. Determines how the image will be transferred.")
     ("idrq",       po::bool_switch()->default_value(0), "Optional argument. Indicates whether IDRQ is used. 1 means idrq is used, 0 means idrq is not used.")
     ("verbose,v",  po::bool_switch()->default_value(0), "Optional argument. Display debug information.")
+    ("emmcdump",   po::bool_switch()->default_value(0), "Optional argument. Indicate whether to perform an emmc dump. Set to false by default")
+    ("file",       po::value<string>(), "Output file name")
+    ("partition",  po::value<int>(), "0 - user partition; 1- boot partition-1; 2 - boot partition-2;3 - E-CSD")
+    ("blocksize",  po::value<long>(), "size of blocks to read (applicable for partitions 0-2)")
+    ("blockcount", po::value<long>(), "number of blocks to read (applicable for partitions 0-2)")
+    ("offset,o",     po::value<long>(), "offset from base of partition to begin reading (applicable for partitions 0-2)")
+    ("register",   po::bool_switch()->default_value(0), "Register Token.")
+    ("ufwdnx,u",   po::value<std::string>()->default_value("BLANK.bin"), "Unsigned DnX.")
+    ("tokenoffset,t",        po::value<string>(), "Token offset for the unsigned DnX. (Default offset: 0x0108)")
+    ("expirationduration,e", po::value<string>(), "Time duration of the token to be valid. Supported format shall be a string which starts with a numeric number followed by h/d/m/y (h for hour, d for day, m for month and y for year)")
+    ("umipdump",           po::bool_switch()->default_value(0), "UMIP dumping. Default value 0 (disable). Set to 1 to enable.")
     ;
 
     options_description cmdlineOptions;
@@ -101,7 +113,7 @@ void CloverviewPlusOptions::Parse(int argc, char* argv[])
                 cout << "\nInvalid argument(s)!" <<endl;
                 cout << "\nDisplaying HELP menu for list of valid arguments ... " << endl;
                 cout << visibleOptions << endl;
-                return;
+                 return;
             }
         }
 
@@ -110,6 +122,54 @@ void CloverviewPlusOptions::Parse(int argc, char* argv[])
             this->isActionRequired = false;
             return;
         }
+        //start emmc args
+        if(vm.count("emmcdump"))
+        {
+            this->performEmmcDump = vm["emmcdump"].as<bool>();
+            this->wipeifwi = false;
+            this->isActionRequired = true;
+        }
+        if(vm.count("register"))
+        {
+            this->m_isRegisterToken = vm["register"].as<bool>();
+        }
+        if(vm.count("file"))
+        {
+            this->file = vm["file"].as<string>();
+        }
+        if(vm.count("ufwdnx"))
+        {
+            this->uFwDnx = vm["ufwdnx"].as<string>();
+        }
+        if(vm.count("partition"))
+        {
+            this->partition = vm["partition"].as<int>();
+        }
+        if(vm.count("blocksize"))
+        {
+            this->blockSize = vm["blocksize"].as<long>();
+        }
+        if(vm.count("blockcount"))
+        {
+            this->blockCount = vm["blockcount"].as<long>();
+        }
+        if(vm.count("offset"))
+        {
+            this->offset = vm["offset"].as<long>();
+        }
+        if(vm.count("tokenoffset"))
+        {
+            this->tokenOffset = vm["tokenoffset"].as<string>();
+        }
+        if(vm.count("expirationduration"))
+        {
+            this->expirationDuration = vm["expirationduration"].as<string>();
+        }
+        if(vm.count("umipdump"))
+        {
+            this->umipdump = vm["umipdump"].as<bool>();
+        }
+        //end emmc args
 
         if(vm.count("softfuse"))
         {
@@ -494,7 +554,7 @@ inline void CloverviewPlusOptions::UpdateFlags()
 {
     this->downloadFW = (this->fwDnxPath.length() > 0 && this->fwImagePath.length() > 0);
     this->downloadOS = (this->osDnxPath.length() > 0 && this->osImagePath.length() > 0);
-    this->isActionRequired = (this->downloadFW || this->downloadOS);
+    this->isActionRequired = (this->downloadFW || this->downloadOS || this->performEmmcDump);
 }
 
 /** \brief Assembles the current state of all options

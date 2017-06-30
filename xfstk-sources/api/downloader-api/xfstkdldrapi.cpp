@@ -1,16 +1,13 @@
 /*
     Copyright (C) 2014  Intel Corporation
-
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
     License as published by the Free Software Foundation; either
     version 2.1 of the License, or (at your option) any later version.
-
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
     Lesser General Public License for more details.
-
     You should have received a copy of the GNU Lesser General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -473,7 +470,6 @@ bool xfstkdldrapi::downloadcli(const char *cli)
     boost::scoped_array<char> message (new char[1024]);
     xfstkdldrfactory* xfstkfactoryinterface = (xfstkdldrfactory*)xfstkfactoryhandle;
     this->showversion();
-
     if(!this->interfaceavailable())
     {
         return false;
@@ -498,11 +494,9 @@ bool xfstkdldrapi::downloadcli(const char *cli)
         devicedetected++;
         sleeper.sleep(1);
     }
-
     QString cliQstr(cli);
     QStringList args = cliQstr.split("--");
     tmpargc = args.size();
-
     int j = 0;
     for(int i = 0 ; i<tmpargc && j<MAX_ARGS; ++i)
     {
@@ -517,11 +511,8 @@ bool xfstkdldrapi::downloadcli(const char *cli)
             strcpy(tmpargv[j],strz.trimmed().toStdString().c_str());
             j++;
         }
-
     }
-
     tmpargc = j;
-
     //Parse the options from the user
     bool retval = xfstkfactoryinterface->SetOptions(tmpargc,tmpargv);
     for(int i = 0; i < tmpargc; ++i)
@@ -532,7 +523,6 @@ bool xfstkdldrapi::downloadcli(const char *cli)
             tmpargv[i] = NULL;
         }
     }
-
     if(!retval) {
         printf("XFSTK: Download options could not be parsed correctly.\n");
         printf("XFSTK: Please connect only a single SoC device and cycle device power.\n");
@@ -562,7 +552,6 @@ bool xfstkdldrapi::downloadcli(const char *cli)
     this->releaseinterface();
     return true;
 }
-
 bool xfstkdldrapi::downloadfw(char *fwdnx, char *fwimage, char *gpflags)
 {
     int tmpargc = 10;
@@ -678,7 +667,6 @@ bool xfstkdldrapi::downloadfw(char *fwdnx, char *fwimage, char *gpflags)
     this->releaseinterface();
     return true;
 }
-
 bool xfstkdldrapi::downloados(char *osdnx, char *osimage, char *gpflags)
 {
     int tmpargc = 10;

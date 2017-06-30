@@ -80,7 +80,7 @@ MerrifieldUtils::MerrifieldUtils()
     this->StepID = 0;
     this->validstatusclientdata = NULL;
     this->validstatuspfn = NULL;
-    this->tmpmsg = new char[2048];
+    this->tmpmsg = new char[TMP_BUFFER_SIZE];
     this->isDebug = 0x0;
 }
 MerrifieldUtils::~MerrifieldUtils()
@@ -192,45 +192,54 @@ int MerrifieldUtils::strstr_lowercase_strip(char szBuff[], const char *keyword, 
 ULONGLONG MerrifieldUtils::scan_string_for_protocol(char szBuff[])
 {
     ULONGLONG keywords_as_ulonglong[MAX_ACK_CODE_MERRIFIIELD] = {
-        SERIAL_START,
+        SERIAL_START,             //0
 
-        BULK_ACK_DFRM,
-        BULK_ACK_DxxM,
-        BULK_ACK_DORM,
-        BULK_ACK_MFLD,
-        BULK_ACK_DXBL,
-        BULK_ACK_READY_UPH_SIZE,
-        BULK_ACK_READY_UPH,
-        BULK_ACK_DIFWI,
-        BULK_ACK_DCFI00,
+        BULK_ACK_DFRM,            //1
+        BULK_ACK_DxxM,            //2
+        BULK_ACK_DORM,            //3
+        BULK_ACK_MFLD,            //4
+        BULK_ACK_DXBL,            //5
+        BULK_ACK_READY_UPH_SIZE,  //6
+        BULK_ACK_READY_UPH,       //7
+        BULK_ACK_DIFWI,           //8
+        BULK_ACK_DCFI00,          //9
+
+        //emmc dump
+        BULK_ACK_RDY$,            //10
+        EMMC_DUMP_ACK,            //11
+        EMMC_DUMP_NACK,           //12
+        EMMC_DUMP_EOIO,           //13
+        BULK_ACK_ER40,            //14
+
         //OS
-        BULK_ACK_OSIPSZ,
-        BULK_ACK_ROSIP,
-        BULK_ACK_DONE,
-        BULK_ACK_RIMG,
-        BULK_ACK_EOIU,
+        BULK_ACK_OSIPSZ,          //15
+        BULK_ACK_ROSIP,           //16
+        BULK_ACK_DONE,            //17
+        BULK_ACK_RIMG,            //18
+        BULK_ACK_EOIU,            //19
+
         //Error codes
-        BULK_ACK_UPDATE_SUCESSFUL,
-        BULK_ACK_INVALID_PING,
-        BULK_ACK_HLT0,
-        BULK_ACK_ER01,
-        BULK_ACK_ER02,
-        BULK_ACK_ER03,
-        BULK_ACK_ER04,
-        BULK_ACK_ER10,
-        BULK_ACK_ER11,
-        BULK_ACK_ER12,
-        BULK_ACK_ER13,
-        BULK_ACK_ER20,
-        BULK_ACK_ER21,
-        BULK_ACK_ER22,
-        BULK_ACK_ER25,
-        BULK_ACK_ERRR,
-        BULK_ACK_ERB0,
-        BULK_ACK_ERB1,
-        BULK_ACK_RTBD,
-        BULK_ACK_DCSDB,
-        BULK_ACK_UCSDB
+        BULK_ACK_UPDATE_SUCESSFUL,//20
+        BULK_ACK_INVALID_PING,    //21
+        BULK_ACK_HLT0,            //22
+        BULK_ACK_ER01,            //23
+        BULK_ACK_ER02,            //24
+        BULK_ACK_ER03,            //25
+        BULK_ACK_ER04,            //26
+        BULK_ACK_ER10,            //27
+        BULK_ACK_ER11,            //28
+        BULK_ACK_ER12,            //29
+        BULK_ACK_ER13,            //30
+        BULK_ACK_ER20,            //31
+        BULK_ACK_ER21,            //32
+        BULK_ACK_ER22,            //33
+        BULK_ACK_ER25,            //34
+        BULK_ACK_ERRR,            //35
+        BULK_ACK_ERB0,            //36
+        BULK_ACK_ERB1,            //37
+        BULK_ACK_RTBD,            //38
+        BULK_ACK_DCSDB,           //39
+        BULK_ACK_UCSDB            //40
     };
 
     int index = index_of_keyword(szBuff, StepID);
@@ -246,46 +255,54 @@ int MerrifieldUtils::index_of_keyword(char szBuff[], int start_index)
     int result = -1;
     int getChunkID = 0;
     const char * keywords[MAX_ACK_CODE_MERRIFIIELD] = {
-        "SoTx",
+        "SoTx",      //0
 
-        "DFRM",
-        "DxxM",
-        "DORM",
-        "MFLD",
+        "DFRM",      //1
+        "DxxM",      //2
+        "DORM",      //3
+        "MFLD",      //4
+        "DXBL",      //5
+        "RUPHS",     //6
+        "RUPH",      //7
+        "DIFWI",     //8
+        "DCFI00",    //9
 
-        "DXBL",
-        "RUPHS",
-        "RUPH",
-        "DIFWI",
-        "DCFI00",
+        //emmc dump
+        "RDY$",      //10
+        "$ACK",      //11
+        "NACK",      //12
+        "EOIO",      //13
+        "ER40",      //14
+
         //OS
-        "OSIP Sz",
-        "ROSIP",
-        "DONE",
-        "RIMG",
-        "EOIU",
+        "OSIP Sz",   //15
+        "ROSIP",     //16
+        "DONE",      //17
+        "RIMG",      //18
+        "EOIU",      //19
+
         //Error Codes
-        "HLT$",
-        "ER00",
-        "HLT0",
-        "ER01",
-        "ER02",
-        "ER03",
-        "ER04",
-        "ER10",
-        "ER11",
-        "ER12",
-        "ER13",
-        "ER20",
-        "ER21",
-        "ER22",
-        "ER25",
-        "ERRR",
-        "ERB0",
-        "ERB1",
-        "RTBD",
-        "DCSDB",
-        "UCSDB"
+        "HLT$",      //20
+        "ER00",      //21
+        "HLT0",      //22
+        "ER01",      //23
+        "ER02",      //24
+        "ER03",      //25
+        "ER04",      //26
+        "ER10",      //27
+        "ER11",      //28
+        "ER12",      //29
+        "ER13",      //30
+        "ER20",      //31
+        "ER21",      //32
+        "ER22",      //33
+        "ER25",      //34
+        "ERRR",      //35
+        "ERB0",      //36
+        "ERB1",      //37
+        "RTBD",      //38
+        "DCSDB",     //39
+        "UCSDB"      //40
     };
 
     for(int i=start_index; i< MAX_ACK_CODE_MERRIFIIELD; i++){
@@ -337,7 +354,7 @@ void MerrifieldUtils::u_log(uint32 logLevel, string message, ...)
         if (isDebug & logLevel)
         {
 
-            memset(tmpmsg,0,2048);
+            memset(tmpmsg,0,TMP_BUFFER_SIZE );
             va_list ap;
             va_start(ap, message);
             vsprintf(tmpmsg,fmtMsg_port.c_str(), ap);

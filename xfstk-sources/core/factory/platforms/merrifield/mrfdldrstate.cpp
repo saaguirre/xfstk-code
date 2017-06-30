@@ -21,18 +21,206 @@
 #if defined XFSTK_OS_WIN
 #include <windows.h>
 #endif
+#include <string.h>
+#include <iostream>
+#include <iomanip>
+#include <cstdio>
+#include <algorithm>
 #include <stdexcept>
+#include "common/scoped_file.h"
 #include <boost/smart_ptr/scoped_array.hpp>
 #include "merrifieldmessages.h"
 #include "mrfdldrstate.h"
 #include <fstream>
-#include "../../common/scoped_file.h"
 #include <QTime>
 #include <string>
 
 #define USB_READ_WRITE_DELAY_MS 0
 
 extern CPSTR Merrifield_error_code_array [MAX_ERROR_CODE];  
+
+#define FILENAME "emmc_dump2.bin"
+#define BLOCKSIZE          512
+#define NUMBLOCKS          6
+#define EMMC_START_ADDR    0
+#define USER_PARTITION     0
+#define BOOT_PARTITION_1   1
+#define BOOT_PARTITION_2   2
+#define EXT_CSD_MODE       3
+#define BUF_SIZE           256*1024 // 256K
+#define ACK_MESSAGE_SIZE   4
+#define DNER_MESSAGE_SIZE  4
+#define EXTCSD_RETURN_SIZE 512
+#define EOIO_MESSAGE_SIZE   20
+
+namespace
+{
+    typedef  struct{
+        char string[4];
+        unsigned int blockSize;
+        unsigned int offsetInEmmc;
+        unsigned int numBlocks;
+    } txHeader_t;
+
+    const unsigned int SECONDS_PER_YEAR  = 31556952; // (365.2425 days/year) (24 hours/day) (60 minutes/hour) (60 seconds/minute) =  31556952 seconds/year
+    const unsigned int SECONDS_PER_MONTH = 2629746;  // SECONDS_PER_YEAR/12
+    const unsigned int SECONDS_PER_DAY   = 86400;    // (24 hours/day) (60 minutes/day) (60 seconds/minute)
+    const unsigned int SECONDS_PER_HOUR  = 3600;     // (60 minutes/day) (60 seconds/minute)
+    const unsigned int MAX_SECONDS       = 0xFFFFFFFF;     // 0xFFFFFFFF seconds
+
+    const int MAX_KEY_COUNT = 16;
+
+    unsigned int convertDurationToSeconds(std::string duration)
+    {
+        // Duration Supported format shall be in a string which
+        //    starts with a numeric number following by h/d/m/y
+        //    (h for hour, d for day, m for month and y for year).
+        //    For example, if one provide 17d, it means the token
+        //    string will expire in 17 days. If the value of the
+        //    duration is zero (i.e. 0h,0d, 0m or 0y), it means the
+        //    token will never expire.
+
+
+        //"trim" - use the erase-remove idiom to delete the white space.
+        duration.erase(std::remove(duration.begin(), duration.end(), ' '), duration.end() );
+
+        //get the expiry format - h, d, m, y
+        const char format = duration[duration.size() -1];
+
+        //get the time in string format and convert it to UINT.
+        const std::string sTime = duration.substr(0, duration.size()-1);
+        std::stringstream ss(sTime);
+        unsigned int time = 0;
+        ss >> time;
+        unsigned int seconds = 0xFFFFFFFF;
+
+        //convert the expiration duration to seconds.
+        switch(format)
+        {
+        case 'h': //convert hours to seconds
+            if(time <= (MAX_SECONDS / SECONDS_PER_HOUR)) //check overflow, A <= 0xFFFFFFFF/B
+                seconds = time * SECONDS_PER_HOUR;
+            break;
+        case 'd': //convert days to seconds
+            if(time <= (MAX_SECONDS / SECONDS_PER_DAY))
+                seconds = time * SECONDS_PER_DAY;
+            break;
+        case 'm': //convert months to seconds
+            if(time <= (MAX_SECONDS / SECONDS_PER_MONTH))
+                seconds = time * SECONDS_PER_MONTH;
+            break;
+        case 'y': //convert years to seconds
+            if(time <= (MAX_SECONDS / SECONDS_PER_YEAR))
+                seconds = time * SECONDS_PER_YEAR;
+            break;
+        default:
+            std::string msg("Unknown expiration duration format. Please use h, d, m, y. (e.g.  '10d' represents 10 days)");
+            throw std::runtime_error(msg);
+            break;
+        }
+
+        return seconds;
+    }
+
+    unsigned int convertHexStringToInteger(const std::string& stringValue)
+    {
+        unsigned int integerValue = 0xff;
+        try
+        {
+            if(!stringValue.empty())
+            {
+                size_t found = stringValue.find("x");
+
+                if(found != std::string::npos)
+                {
+                    std::string newStringValue = stringValue.substr(found+1);
+                    std::stringstream ss(newStringValue);
+                    ss << std::hex << newStringValue.c_str();
+                    ss>>integerValue;
+                }
+                else
+                {
+                    integerValue = atoi(stringValue.c_str());
+                }
+            }
+        }
+        catch(std::exception& e )
+        {
+            std::cout << "Error: "<< e.what() << std::endl;
+        }
+
+
+        return integerValue;
+    }
+
+    bool writeTokenToFile(const std::string& filename, const std::string& uid, const std::string& expiry, bool isExpiryEnabled)
+    {
+        std::stringstream ss1, ss2;
+        for(std::size_t i=0; i<uid.length(); ++i)
+        {
+            unsigned int idata = static_cast<unsigned char> (uid[i]);
+            ss1 << std::hex << std::setfill('0') << std::setw(2) << idata;
+        }
+        for(std::size_t i=0; i<expiry.length(); ++i)
+        {
+            unsigned int idata = static_cast<unsigned char> (expiry[i]);
+            ss2 << std::hex << std::setfill('0') << std::setw(2) << idata;
+        }
+        try
+        {
+            {
+                scoped_file tokenfile(filename.c_str(), "wb");
+                tokenfile.write(ss1.str().c_str(), sizeof(char), 64);
+            }
+
+
+            if(isExpiryEnabled)
+            {
+                {
+                    scoped_file tokenfile(filename.c_str(), "a");
+                    tokenfile.write("\n", sizeof(char), 1);
+
+                }
+                {
+                    scoped_file tokenfile(filename.c_str(), "ab");
+                    tokenfile.write(ss2.str().c_str(), sizeof(char), 16);
+                }
+
+            }
+
+            return true;
+        }
+        catch(std::exception& e)
+        {
+            std::cout << "Error: " << e.what() <<std::endl;
+        }
+
+        return false;
+    }
+
+    bool writeTokenToUnsignedDnXAtOffset(const std::string& filename, const std::string& token, unsigned int offset, bool isExpiryEnabled)
+    {
+        try
+        {
+            scoped_file tokenfile(filename.c_str(),"r+b");
+            tokenfile.seek( offset , SEEK_SET );
+            if(isExpiryEnabled)
+            {
+                tokenfile.write(token.c_str(), sizeof(char), 40);
+            }
+            else
+            {
+                tokenfile.write(token.c_str(), sizeof(char), 32);
+            }
+            return true;
+        }
+        catch(std::exception& e)
+        {
+            std::cout << "Error: " << e.what() <<std::endl;
+        }
+        return false;
+    }
+}
 
 mrfdldrstate::mrfdldrstate()
 {
@@ -65,6 +253,19 @@ mrfdldrstate::mrfdldrstate()
     directcsdbStatus = 0;
 
     m_delay_ms = USB_READ_WRITE_DELAY_MS;
+    m_emmc_fname_signed_dnx = NULL;
+    m_emmc_outfile = "";
+    m_emmc_token_offset = "";
+    m_emmc_expirationdur = "";
+    m_emmc_partition = 0;
+    m_emmc_blocksize = 0;
+    m_emmc_blockcount = 0;
+    m_emmc_offset = 0;
+    m_emmc_umip_enabled = false;
+    m_emmc_register_token_enabled = false;
+    m_usb_delayms = USB_READ_WRITE_DELAY_MS;;
+    m_perform_emmc_dump = false;
+
 
     // FW Upgrade Ack values, index pair map
     int i = 0;
@@ -91,6 +292,16 @@ mrfdldrstate::mrfdldrstate()
     m_bulk_ack_map.insert(std::make_pair(BULK_ACK_DCSDB,new MrfdFwHandleDCSDB));
     m_bulk_ack_map.insert(std::make_pair(BULK_ACK_UCSDB,new MrfdFwHandleUCSDB));
 
+    // eMMC dump
+    m_bulk_ack_map.insert(std::make_pair(BULK_ACK_RDY$, new MrfdEmmcDumpRDY$));
+    m_bulk_ack_map.insert(std::make_pair(EMMC_DUMP_ACK, new MrfdEmmcDump$ACK));
+    m_bulk_ack_map.insert(std::make_pair(EMMC_DUMP_NACK, new MrfdEmmcDumpNACK));
+    m_bulk_ack_map.insert(std::make_pair(MERR_EMMC_DUMP_STATE_TRANSFER, new MrfdStEmmcDumpTransfer));
+    m_bulk_ack_map.insert(std::make_pair(EMMC_DUMP_ECSD, new MrfdEmmcDumpECSD));
+    m_bulk_ack_map.insert(std::make_pair(EMMC_DUMP_SPR$, new MrfdEmmcDumpSPR$));
+    m_bulk_ack_map.insert(std::make_pair(EMMC_DUMP_REQB, new MrfdEmmcDumpREQB));
+    m_bulk_ack_map.insert(std::make_pair(EMMC_DUMP_EOIO, new MrfdEmmcDumpEOIO));
+    m_bulk_ack_map.insert(std::make_pair(BULK_ACK_ER40, new MrfdEmmcDumpER40));
 
     //Set up device error code handler
     m_bulk_ack_map.insert(std::make_pair(BULK_ACK_ER01, new MrfdErHandleLogError));
@@ -184,6 +395,49 @@ bool mrfdldrstate::UsbDevInit(void)
     m_b_usbinitok = m_usbdev->Open();
     return m_b_usbinitok;
 }
+
+void mrfdldrstate::SetOptions(MerrifieldOptions *Options)
+{
+    DeviceSpecificOptions = Options;
+}
+
+bool mrfdldrstate::DoEmmcUpdate(char* emmc_fname_signed_dnx, std::string emmc_outfile, \
+                       std::string emmc_token_offset, std::string emmc_expirationdur, int emmc_partition, \
+                       long emmc_blocksize,long emmc_blockcount, long emmc_offset, bool emmc_umip_enabled, \
+                       unsigned int usb_delayms)
+{
+    m_fw_done = false;
+    m_GPPReset = false;
+    m_abort = false;
+    m_state_change = false;
+
+    if(DeviceSpecificOptions->IsRegisterToken())
+    {
+        return doRegisterToken();
+    }
+    else
+    {
+        m_fname_dnx_fw = emmc_fname_signed_dnx;
+        m_emmc_outfile = emmc_outfile;
+        m_emmc_token_offset = emmc_token_offset;
+        m_emmc_expirationdur = emmc_expirationdur;
+        m_emmc_partition = emmc_partition;
+        m_emmc_blocksize = emmc_blocksize;
+        m_emmc_blockcount = emmc_blockcount;
+        m_emmc_offset = emmc_offset;
+        m_emmc_umip_enabled = emmc_umip_enabled;
+        m_delay_ms = usb_delayms;
+        m_perform_emmc_dump = true;
+        m_ifwiwipe_enable = false;
+        directcsdbStatus = false;
+        csdbStatus = " ";
+
+
+        return StateMachine();
+    }
+}
+
+
 bool mrfdldrstate::DoUpdate(char* fname_dnx_fw, char* fname_fw_image, char* fname_dnx_os, \
                          char* fname_os_image, char* fname_dnx_misc, unsigned long gpflags, \
                          unsigned long usbdelayms, bool ifwiwipeenable, char* miscbin)
@@ -406,7 +660,6 @@ void mrfdldrstate::LogError(unsigned long errorcode)
         m_abort = true;
         m_last_error.error_code = errorcode;
         this->m_utils->u_log(LOG_STATUS, "Error Firmware/OS Image Not initialized");
-
     }
 
     if(errorcode == 0x2468)
@@ -414,18 +667,40 @@ void mrfdldrstate::LogError(unsigned long errorcode)
         m_abort = true;
         m_last_error.error_code = errorcode;
         this->m_utils->u_log(LOG_STATUS, "Invalid Progress bar initialization");
-
     }
-    if(errorcode < MAX_ERROR_CODE) {
-        if(errorcode == 0) {
+    if(errorcode < MAX_ERROR_CODE)
+    {
+        if(errorcode == 0)
+        {
             this->m_utils->u_log(LOG_STATUS, "Error Code: %d - %s", errorcode, Merrifield_error_code_array[errorcode]);
-        } else {
+        }
+        else
+        {
             this->m_utils->u_log(LOG_STATUS,"Error Code: %d - %s", errorcode, Merrifield_error_code_array[errorcode]);
             m_abort = true;
         }
         m_last_error.error_code = errorcode;
         strcpy(m_last_error.error_message, Merrifield_error_code_array[errorcode]);
     }
+}
+
+void mrfdldrstate::LogError(int errorcode, std::string msg)
+{
+    m_utils->u_log(LOG_ENTRY, "%s", __FUNCTION__);
+
+    if(errorcode == 0) {
+        m_utils->u_log(LOG_STATUS, "Error Code: %d - %s", errorcode, msg.c_str());
+    } else {
+        m_utils->u_log(LOG_STATUS,"Error Code: %d - %s", errorcode, msg.c_str());
+        m_abort = true;
+    }
+    m_last_error.error_code = errorcode;
+
+    char * str = new char[msg.size() + 1];
+    std::copy(msg.begin(), msg.end(), str);
+    str[msg.size()] = '\0';
+    strcpy(m_last_error.error_message, str);
+    delete[] str;
 }
 
 bool mrfdldrstate::GetLastError(last_error* er)
@@ -656,6 +931,313 @@ void mrfdldrstate::Visit(MrfdFwHandleHLT0 &)
     m_fw_done = true;
 }
 
+void mrfdldrstate::Visit(MrfdStEmmcDumpTransfer& )
+{
+    m_utils->u_log(LOG_STATUS, "Transfer started");
+
+    std::string outfile;
+    int partition = 0;
+    int blockCount = 0;
+    int blockSize = 0;
+    int offsetInEmmc = 0;
+    bool bRegisterToken = false;
+    string tokenOffset = "0x010C";
+
+    outfile = m_emmc_outfile;
+    if (m_emmc_umip_enabled)
+    {
+        partition = 0;
+        blockCount = 1;
+        blockSize = 65536;
+        offsetInEmmc = 512;
+    }
+    else
+    {
+        partition = m_emmc_partition;
+        blockCount = m_emmc_blockcount;
+        blockSize = m_emmc_blocksize;
+        offsetInEmmc = m_emmc_offset;
+        bRegisterToken = m_emmc_register_token_enabled;
+        tokenOffset = m_emmc_token_offset;
+     }
+
+    const char * ofname = outfile.c_str();
+    unsigned int receivedCount=0;   //  16     *  131072  = 2097152
+    unsigned int expectedToReceive = blockCount*blockSize;
+
+    bool success = true;
+    int status = 0;
+
+    boost::scoped_array<char> tmp (new char[BUF_SIZE]);
+    txHeader_t* txHeader = (txHeader_t*) (tmp.get());
+
+
+    if( partition == 3 ) {  // ECSD
+
+        m_utils->u_log(LOG_STATUS, "opening file for IO\r\n");
+        try
+        {
+            scoped_file file(ofname,"wb");
+
+            blockSize = 512;
+
+            m_utils->u_log(LOG_STATUS, "Sending ECSD\n");
+            strcpy(tmp.get(), "ECSD"); // Send request for user partition
+            txHeader = (txHeader_t*) (tmp.get());
+            txHeader->blockSize = blockSize;
+            txHeader->offsetInEmmc = offsetInEmmc;
+
+            success = m_usbdev->Write(tmp.get(), sizeof(txHeader_t));
+
+            if (!success) {
+                printf("\nError writing ECSD");
+                return;
+            }
+
+            success = m_usbdev->Read(tmp.get(), blockSize);
+
+            if(tmp[0] == 'E' && tmp[1] == 'R' && tmp[2] == '4' && tmp[3] == '6')
+            {
+                LogError(46, "\nFailure reading ECSD from eMMC.");
+                return;
+            }
+
+            if (!success)
+            {
+                printf("\nError reading ECSD response");
+                fflush(stdout);
+                m_abort = true;
+                return;
+            }
+
+            file.write(tmp.get(), sizeof(char), blockSize);
+        }
+        catch(std::exception& e)
+        {
+            std::cout << "Error: "<< e.what() << std::endl;
+            m_abort = true;
+            return;
+        }
+
+        transferComplete();
+        return;
+    }
+
+    // Set the partition:
+    m_utils->u_log(LOG_STATUS, "Sending SPR$");
+    strcpy(tmp.get(), "SPR$");
+    txHeader->blockSize = partition;
+
+    success = m_usbdev->Write(tmp.get(), sizeof(txHeader_t));
+    if (!success) {
+        this->m_utils->u_log(LOG_STATUS, "Error writing SPR$");
+        m_abort = true;
+        return;
+    }
+
+    //Token Verification
+    success = m_usbdev->Read(tmp.get(), 4);
+    if (!success) {
+        m_utils->u_log(LOG_STATUS, "Error reading SPR$ response.");
+        m_abort = true;
+        return;
+    }
+    if(tmp[0] == 'R' && tmp[1] == 'D' && tmp[2] == 'Y' && tmp[3] == '$')
+    {
+        m_utils->u_log(LOG_STATUS, "SPR$ Success");
+    }
+    else if(tmp[0] == 'E' && tmp[1] == 'R' && tmp[2] == '4' && tmp[3] == '2')
+    {
+        LogError(42, "\nPartition access not allowed.");
+        return;
+    }
+    else if(tmp[0] == 'E' && tmp[1] == 'R' && tmp[2] == '4' && tmp[3] == '3')
+    {
+        LogError(43, "\nToken mismatched.");
+        return;
+    }
+
+    else if(tmp[0] == 'E' && tmp[1] == 'R' && tmp[2] == '4' && tmp[3] == '4')
+    {
+        LogError(44, "\nToken has expired.");
+        return;
+    }
+    else if(tmp[0] == 'E' && tmp[1] == 'R' && tmp[2] == '4' && tmp[3] == '5')
+    {
+        LogError(45, "\nFailure during eMMC partition switching.");
+        return;
+    }
+    else
+    {
+        printf("\nUnkown command.\n");
+        m_abort = true;
+        return;
+    }
+
+    try // Request and receive data from target:
+    {
+
+        scoped_file file(outfile.c_str(),"wb");
+
+        while(blockCount) {
+            strcpy(tmp.get(), "REQB");
+            txHeader = (txHeader_t*) (tmp.get());
+            txHeader->blockSize = blockSize;
+            txHeader->offsetInEmmc = offsetInEmmc;
+
+            success = m_usbdev->Write(tmp.get(), sizeof(txHeader_t));
+
+            if( !success) {
+                 this->m_utils->u_log(LOG_STATUS, "Error writing REQB");
+                 m_abort = true;
+                 status = -1;
+                 break;
+            }
+
+            success = m_usbdev->Read(tmp.get(), blockSize);
+
+            if (!success)
+            {
+                printf("\nError reading");
+                m_abort = true;
+                fflush(stdout);
+                status = -1;
+                break;
+            }
+            if(tmp[0] == 'E' && tmp[1] == 'R' && tmp[2] == '4' && tmp[3] == '1')
+            {
+                LogError(41, "\nFailure reading from eMMC or invalid block size.");
+                fflush(stdout);
+                status = -1;
+                break;
+            }
+            file.write(tmp.get(), sizeof(char), blockSize);
+            this->m_utils->u_log(LOG_STATUS, "Number of blocks remaining: %d",blockCount);
+            offsetInEmmc += blockSize;
+            receivedCount += blockSize;
+            blockCount--;
+        }
+    }
+    catch(std::exception& e)
+    {
+        std::cout << "Error: "<< e.what() << std::endl;
+        m_abort = true;
+        return;
+    }
+
+    m_utils->u_log(LOG_STATUS, "received: %X / %X\n\r", receivedCount, expectedToReceive );
+
+    //check to see progress:
+    if(receivedCount >= expectedToReceive){
+        m_utils->u_log(LOG_STATUS, "We have received %d bytes - done\n", receivedCount);
+        status = 0;
+    }
+
+    if( ! status ) {
+        // Done!
+        transferComplete();
+
+        }else if ( -1 == status ){
+            printf( "read error...\n");
+            m_abort = true;
+            return;
+        }
+    else {
+        printf("some other error...\n");
+        m_abort = true;
+        return;
+    }
+
+}
+
+void mrfdldrstate::transferComplete()
+{
+    char tmp[BUF_SIZE];
+    unsigned int* pDW = (unsigned int*)tmp;
+
+    bool success = false;
+    m_utils->u_log(LOG_STATUS, "EMMCDUMP Transfers completed");
+
+    ///////////////////////////
+    strcpy(tmp, "STAT");
+
+    success = m_usbdev->Write(tmp, sizeof(txHeader_t));
+    if( !success)
+    {
+         printf("\nError sending STAT");
+    }
+    success = m_usbdev->Read(tmp, EOIO_MESSAGE_SIZE);
+
+    if (!success)
+    {
+        printf("\nError reading EOIO message... aborting");
+        m_abort = true;
+    }
+    else
+    {
+        if( tmp[0] == 'I' && tmp[1] == 'N' && tmp[2] == 'F' && tmp[3] == 'O' ) {
+                m_utils->u_log(LOG_STATUS, "Received STAT - transfer complete\n");
+                m_utils->u_log(LOG_STATUS, "Number of errors: %d\n",pDW[1]);
+                m_utils->u_log(LOG_STATUS, "Number of transfers: %d\n",pDW[2]);
+                m_utils->u_log(LOG_STATUS, "Number of unknown commands received: %d\n",pDW[3]);
+                m_utils->u_log(LOG_STATUS, "Number of retries due to unknown commands: %d\n",pDW[4]);
+                m_fw_done = true;
+        }else{
+                printf("unexpected message received\n");
+                m_abort = true;
+        }
+    }
+
+    strcpy(tmp, "DONE");
+
+    success = m_usbdev->Write(tmp, sizeof(txHeader_t));
+
+    if( !success)
+    {
+         printf("\nError sending DONE");
+    }
+}
+
+void mrfdldrstate::Visit(MrfdEmmcDump$ACK& )
+{
+    m_utils->u_log(LOG_STATUS, "eMMC Dump $ACK");
+    GotoState(MERR_EMMC_DUMP_STATE_TRANSFER);
+}
+
+void mrfdldrstate::Visit(MrfdEmmcDumpNACK& )
+{
+    m_utils->u_log(LOG_STATUS, "eMMC Dump NACK");
+    m_abort = true;
+}
+
+void mrfdldrstate::Visit(MrfdEmmcDumpECSD& )
+{
+    m_utils->u_log(LOG_STATUS, "eMMC Dump ECSD");
+}
+
+void mrfdldrstate::Visit(MrfdEmmcDumpREQB& )
+{
+    m_utils->u_log(LOG_STATUS, "eMMC Dump REQB");
+}
+
+void mrfdldrstate::Visit(MrfdEmmcDumpEOIO& )
+{
+    m_utils->u_log(LOG_STATUS, "eMMC Dump EOIO");
+    printf("\nDONE<->EOIO handshake completed...");
+    m_fw_done = true;
+}
+
+void mrfdldrstate::Visit(MrfdEmmcDumpRDY$& )
+{
+    m_utils->u_log(LOG_STATUS, "eMMC Dump $ACK");
+    GotoState(MERR_EMMC_DUMP_STATE_TRANSFER);
+}
+void mrfdldrstate::Visit(MrfdEmmcDumpER40& )
+{
+    LogError(40, "\nInitialize eMMCHW and Card failed.");
+ }
+
+
 void mrfdldrstate::Visit(MrfdFwHandleDFRM& )
 {
     this->m_utils->u_log(LOG_ENTRY, "%s", __FUNCTION__);
@@ -698,7 +1280,7 @@ void mrfdldrstate::Visit(MrfdFwHandleDxxM& )
     //If want to wipe out old ifwi image on emmc to make the emmc like virgin
     if(m_ifwiwipe_enable)
         GotoState(DLDR_STATE_FW_WIPE);
-    else if(m_b_DnX_OS || strlen(m_fname_dnx_misc) > 3) //Only if misc dnx file is provided
+    else if(m_perform_emmc_dump || m_b_DnX_OS || strlen(m_fname_dnx_misc) > 3) //Only if misc dnx file is provided
         GotoState(DLDR_STATE_FW_MISC);
     else
         GotoState(DLDR_STATE_FW_NORMAL);
@@ -716,18 +1298,21 @@ void mrfdldrstate::Visit(MrfdFwHandleDXBL& )
 
     if(m_dldr_state == DLDR_STATE_FW_NORMAL  \
             || m_dldr_state == DLDR_STATE_FW_MISC \
-            || m_dldr_state == DLDR_STATE_FW_WIPE) {
+            || m_dldr_state == DLDR_STATE_FW_WIPE)
+    {
 
         this->m_utils->u_log(LOG_FWUPGRADE, "FW: Sending DnX ...");
         ret = FwDXBL();
-    } else {
+    } else
+    {
         this->m_utils->u_log(LOG_OS, "OS: Sending DnX ...");
         ret = OsDXBL();
     }
 
     EndlogTime();
 
-    if(!ret) {
+    if(!ret)
+    {
         m_abort = true;
     }
     LogProgress();
@@ -1037,7 +1622,14 @@ void mrfdldrstate::Visit(MrfdFwHandleRESET& )
 void mrfdldrstate::Visit(MrfdFwHandleHLT$& )
 {
     // --- ACK Received: HLT$ ---
-    this->m_utils->u_log(LOG_FWUPGRADE, "FW: Firmware update completed...");
+    if(m_perform_emmc_dump)
+    {
+        this->m_utils->u_log(LOG_FWUPGRADE, "FW: Emmc dump completed...");
+    }
+    else
+    {
+        this->m_utils->u_log(LOG_FWUPGRADE, "FW: Firmware update completed...");
+    }
 #if 0
     gettimeofday(&m_end_time, NULL);
     m_time_elapsed = get_time_elapse(&m_start_time, &m_end_time);
@@ -1397,7 +1989,7 @@ void mrfdldrstate::Visit(MrfdStHandleFwNormal& )
 
     m_mfld_fw = new MerrifieldFW;
 
-    if(m_mfld_fw->Init(m_fname_dnx_fw, m_fname_fw_image,m_fname_bin_misc ,csdbStatus , m_utils, m_gpflags, false))
+    if(m_mfld_fw->Init(m_fname_dnx_fw, m_fname_fw_image,m_fname_bin_misc ,csdbStatus , m_utils, m_gpflags, false,m_perform_emmc_dump))
     {
         //Set the state machine to virgin emmc download
         m_dldr_state = DLDR_STATE_FW_NORMAL;
@@ -1433,14 +2025,16 @@ void mrfdldrstate::Visit(MrfdStHandleFwMisc& )
 
     m_mfld_fw = new MerrifieldFW;
 
-    if(m_mfld_fw->Init(m_fname_dnx_misc, m_fname_fw_image,m_fname_bin_misc, csdbStatus , m_utils, m_gpflags, false) && !m_b_DnX_OS)
+    if(m_mfld_fw->Init(m_fname_dnx_fw, m_fname_fw_image,m_fname_bin_misc, csdbStatus , m_utils, m_gpflags, false,m_perform_emmc_dump) && !m_b_DnX_OS)
     {
         //Send DnX FW size header data to target device
         //This will start the FW state machine
         this->m_utils->u_log(LOG_STATUS, "FW(Miscdnx) download is in progress ... ");
 
         ret = StartFw();
-    } else if(m_b_DnX_OS || (this->m_utils->FileSize(m_fname_dnx_misc) == 0) || (this->m_utils->FileSize(m_fname_fw_image) == 0)) {
+    }
+    else if(m_b_DnX_OS || (this->m_utils->FileSize(m_fname_dnx_misc) == 0) || (this->m_utils->FileSize(m_fname_fw_image) == 0))
+    {
         ret = HandleNoSize();
         ret = true;
     }
@@ -1473,7 +2067,7 @@ void mrfdldrstate::Visit(MrfdStHandleFwWipe& )
     //Set gpflags to do a FW cold reset
     temp_gpflags = m_gpflags | 0x2;
 
-    if(m_mfld_fw->Init(m_fname_dnx_fw, m_fname_fw_image,m_fname_bin_misc, csdbStatus , m_utils, temp_gpflags, true) && !m_b_DnX_OS)
+    if(m_mfld_fw->Init(m_fname_dnx_fw, m_fname_fw_image,m_fname_bin_misc, csdbStatus , m_utils, temp_gpflags, true, m_perform_emmc_dump) && !m_b_DnX_OS)
     {
         //Send DnX FW size header data to target device
         //This will start the FW state machine
@@ -1577,7 +2171,7 @@ void mrfdldrstate::Visit(MrfdStHandleOsMisc& )
 
     m_mfld_os = new MerrifieldOS;
 
-    ret = m_mfld_os->Init(m_fname_dnx_os, m_fname_dnx_misc, m_utils, m_gpflags);
+    ret = m_mfld_os->Init(m_fname_dnx_os, m_fname_os_image, m_utils, m_gpflags);
     if(ret)
     {
         //Send DnX OS size header data to target device
@@ -1794,11 +2388,11 @@ bool mrfdldrstate::Start()
         this->m_utils->u_log(LOG_OPCODE, "Sending IDRQ...");
         preamble_msg = PREAMBLE_IDRQ;
     }
-    else if(!(this->directcsdbStatus & INITCSDB_MASK))
+    else if((!(this->directcsdbStatus & INITCSDB_MASK)) && !m_perform_emmc_dump)
     {
         m_mfld_fw = new MerrifieldFW;
 
-        if(m_mfld_fw->Init(m_fname_dnx_misc, m_fname_fw_image,m_fname_bin_misc, csdbStatus , m_utils, m_gpflags, false) && !m_b_DnX_OS)
+        if(m_mfld_fw->Init(m_fname_dnx_misc, m_fname_fw_image,m_fname_bin_misc, csdbStatus , m_utils, m_gpflags, false, m_perform_emmc_dump) && !m_b_DnX_OS)
         {
             GotoState(BULK_ACK_DCSDB);
             return true;
@@ -1836,6 +2430,145 @@ void mrfdldrstate::SleepMs(int delay)
 #else
         usleep(1000*delay);
 #endif
+}
+
+bool mrfdldrstate::doRegisterToken()
+{
+    const int SN_BUF_SIZE = 32;
+    char sn[SN_BUF_SIZE];
+    m_usbdev->GetUsbsn(sn);
+
+    const int TIME_BUF_SIZE = 4;
+    unsigned int expirationDurationSeconds = 0;
+    if(!DeviceSpecificOptions->GetEmmcExpirationDur().empty()) //handle expiry
+    {
+        try
+        {
+            expirationDurationSeconds = convertDurationToSeconds(DeviceSpecificOptions->GetEmmcExpirationDur());
+        }
+        catch(std::exception& e)
+        {
+            cout << "\n" << e.what() << "\n";
+            return false;
+        }
+    }
+    else
+    {
+        m_utils->u_log(LOG_STATUS, "\nWarning expiration duration not set. Expiry will not be written to file.\n");
+    }
+
+    unsigned char minTime[TIME_BUF_SIZE] = {0xFF, 0xFF, 0xFF, 0xFF};
+    unsigned char maxTime[TIME_BUF_SIZE] = {0xFF, 0xFF, 0xFF, 0xFF};
+
+    if(expirationDurationSeconds == 0)
+    {
+        m_utils->u_log(LOG_STATUS, "\nToken expiry disabled.\n");
+    }
+    else if(expirationDurationSeconds == MAX_SECONDS)
+    {
+        printf("\nWarning: Expiration duration exceeds maximum time. Token expiry disabled.\n");
+    }
+    else //read counter and calculate expiry time
+    {
+        m_utils->u_log(LOG_STATUS, "Sending IDRQ...");
+        ULONG preamble_msg = PREAMBLE_IDRQ;
+        if(!WriteOutPipe((PUCHAR)&preamble_msg, 4))
+        {
+            this->m_utils->u_log(LOG_STATUS, "IDRQ Write Error");
+            return 0;
+        }
+        SleepMs(m_delay_ms);
+        //read in header, keys, and error code
+        char data[BUF_SIZE];
+        if(!m_usbdev->Read(data,MAX_KEY_COUNT*8*sizeof(DWORD) + 2*sizeof(DWORD)))
+        {
+            this->m_utils->u_log(LOG_STATUS, "IDRQ Read Error");
+            return 0;
+        }
+
+        const int numOfkeys = *(data+3);
+
+        //skip header [1 dword], skip hash keys [numkeys * 8 dwords], skip error code [1 dword]
+        memcpy(&minTime,(data+sizeof(DWORD)+(8*numOfkeys)*sizeof(DWORD)+sizeof(DWORD)),sizeof(DWORD));
+
+        std::stringstream ss1;
+        int i = TIME_BUF_SIZE;
+        while(i != 0)
+        {
+            i--;
+            unsigned int idata = static_cast<unsigned char> (minTime[i]);
+            ss1 << std::hex << idata;
+        }
+        unsigned int minTimeValue = 0;
+        ss1 >> std::hex >> minTimeValue;
+
+        unsigned int maxTimeValue = 0;
+        if(minTimeValue == MAX_SECONDS)
+        {
+            printf("Warning: Expiration duration cannot be set. Token expiry disabled.");
+            for(int i =0; i < TIME_BUF_SIZE; ++i)
+            {
+                maxTime[i] = 0xFF;
+            }
+        }
+        else //calculate max time given expiration duration
+        {
+            maxTimeValue = minTimeValue + expirationDurationSeconds;
+
+            //check overflow
+            if(maxTimeValue < minTimeValue)
+            {
+                printf("Warning: Expiration duration cannot be set. Token expiry disabled.");
+                for(int i =0; i < TIME_BUF_SIZE; ++i)
+                {
+                    minTime[i] = 0xFF;
+                    maxTime[i] = 0xFF;
+                }
+            }
+            else //set max time
+            {
+                std::stringstream ss2;
+                for(int i=0; i<TIME_BUF_SIZE; ++i){
+                    unsigned int byte = maxTimeValue & 0xFF;
+                    maxTime[i] = byte;
+                    maxTimeValue >>= 8;
+                }
+            }
+        }
+    }
+
+    std::string token;
+    std::string s1(sn, sn+SN_BUF_SIZE);
+    std::string s2(minTime, minTime+ sizeof(DWORD));
+    std::string s3(maxTime, maxTime+ sizeof(DWORD));
+    token = s1 + s2 + s3;
+
+    if(!DeviceSpecificOptions->GetEmmcFile().empty())
+    {
+        if(writeTokenToFile(DeviceSpecificOptions->GetEmmcFile(), s1, s2+s3, !DeviceSpecificOptions->GetEmmcExpirationDur().empty()))
+        {
+            printf("Token written to file.\n");
+        }
+        else
+        {
+            printf("Error writing token to file.\n");
+        }
+    }
+
+    if(!DeviceSpecificOptions->GetEmmcUnsignedFwDNX().empty())
+    {
+        unsigned int iOffset = convertHexStringToInteger(DeviceSpecificOptions->GetEmmcTokenOffset());
+        if(writeTokenToUnsignedDnXAtOffset(DeviceSpecificOptions->GetEmmcUnsignedFwDNX(), token, iOffset, !DeviceSpecificOptions->GetEmmcExpirationDur().empty()))
+        {
+            printf("Token written to unsigned DnX.\n");
+        }
+        else
+        {
+            printf("Error writing token to unsigned DnX.\n");
+        }
+    }
+
+    return true;
 }
 
 bool mrfdldrstate::StateMachine()

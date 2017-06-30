@@ -45,11 +45,12 @@ using namespace std;
 class MerrifieldFW
 {
 public:
-	MerrifieldFW();
-	~MerrifieldFW();
-    bool Init(char* fname_dnx_fw, char* fname_fw_image, char* fname_miscbin, string csdbStatus,
-					MerrifieldUtils* utils, unsigned long gpflags, bool enable_ifwi_wipe);
-        dnx_data* GetFwImageData(unsigned long index);
+    MerrifieldFW();
+    ~MerrifieldFW();
+    bool Init(char *fname_dnx_fw, char *fname_fw_image, char* fname_miscbin, string csdbStatus,
+              MerrifieldUtils *utils, unsigned long gpflags, bool enable_ifwi_wipe,
+              bool perform_emmc_dump);
+    dnx_data* GetFwImageData(unsigned long index);
 private:
     bool initChaabiSize();
 	bool InitDnx();

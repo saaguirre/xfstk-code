@@ -51,6 +51,18 @@ private:
     void UpdateFlags();
     bool allPathsAreValid();
     void ParseLegacy(int, char*[]);
+    //emmc
+    string file;
+    string uFwDnx;
+    int partition;
+    long blockSize;
+    long blockCount;
+    long offset;
+    string tokenOffset;
+    string expirationDuration;
+    bool umipdump;
+    bool m_isRegisterToken;
+    bool performEmmcDump;
 public:
     CloverviewPlusOptions();
     void SetDefaults();
@@ -77,5 +89,17 @@ public:
     bool IsActionRequired();
     bool IsVerbose();
     bool IsWipeIfwiEnabled();
+    //emmc
+    string GetEmmcFile(){return file;}
+    string GetEmmcUnsignedFwDNX(){return uFwDnx;}
+    string GetEmmcTokenOffset(){return tokenOffset;}
+    string GetEmmcExpirationDur() const { return expirationDuration; }
+    int GetEmmcPartition(){return partition;}
+    long GetEmmcBlockSize(){return blockSize;}
+    long GetEmmcBlockCount(){return blockCount;}
+    long GetEmmcOffset(){return offset;}
+    bool IsEmmcUmipDumpEnabled(){return umipdump;}
+    bool IsPerformEmmcDumpEnabled(){return performEmmcDump;}
+    bool IsEmmcRegisterTokenEnabled(){return m_isRegisterToken;}
 };
 #endif // CLOVERVIEWPLUSOPTIONS_H

@@ -20,8 +20,6 @@
 
 #include <string>
 #include "../../interfaces/ioptions.h"
-#include "../../common/scoped_file.h"
-
 #include <boost/program_options.hpp>
 
 using namespace std;
@@ -33,6 +31,7 @@ using namespace boost::program_options;
 class MerrifieldOptions : public IOptions
 {
 private:
+    string SoftfusesPath; //not supported on this platform, used for parseing generic platforms (superset strategy)
     string fwDnxPath;
     string fwImagePath;
     string osDnxPath;
@@ -57,6 +56,19 @@ private:
     bool allPathsAreValid();
     void ParseLegacy(int, char*[]);
     bool validateCSDBState();
+    //emmc
+    string file;
+    string uFwDnx;
+    int partition;
+    long blockSize;
+    long blockCount;
+    long offset;
+    string tokenOffset;
+    string expirationDuration;
+    bool umipdump;
+    bool m_isRegisterToken;
+    bool performEmmcDump;
+
 public:
     MerrifieldOptions();
     void SetDefaults();
@@ -86,5 +98,17 @@ public:
     bool IsVerbose();
     bool IsWipeIfwiEnabled();
     int serialComPort;
+    //emmc
+    string GetEmmcFile(){return file;}
+    string GetEmmcUnsignedFwDNX(){return uFwDnx;}
+    string GetEmmcTokenOffset(){return tokenOffset;}
+    string GetEmmcExpirationDur() const { return expirationDuration; }
+    int GetEmmcPartition(){return partition;}
+    long GetEmmcBlockSize(){return blockSize;}
+    long GetEmmcBlockCount(){return blockCount;}
+    long GetEmmcOffset(){return offset;}
+    bool IsEmmcUmipDumpEnabled(){return umipdump;}
+    bool IsPerformEmmcDumpEnabled(){return performEmmcDump;}
+    bool IsRegisterToken() const { return m_isRegisterToken; }
 };
 #endif // MerrifieldOPTIONS_H

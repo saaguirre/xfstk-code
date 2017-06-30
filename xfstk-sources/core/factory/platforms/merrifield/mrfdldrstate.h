@@ -28,6 +28,7 @@
 #include "../../interfaces/ivisitor.h"
 #include "merrifieldfw.h"
 #include "merrifieldos.h"
+#include "merrifieldoptions.h"
 #include "../../interfaces/idevice.h"
 #include "../../interfaces/idownloader.h"
 #include "mrfdldrhandler.h"
@@ -42,14 +43,14 @@ using namespace std;
 #define CSDB_RESULT_OFFSET 12
 
 //Dldr state defines, make it similiar to ach code
-#define DLDR_STATE_INVALID     0x5354494EULL //"STIN"
-#define DLDR_STATE_FW_NORMAL   0x5354464EULL //"STFN"
-#define DLDR_STATE_FW_MISC     0x5354464DULL //"STFM"  //For none virgin eMMC
-#define DLDR_STATE_OS_NORMAL   0x53544f4EULL //"STON"  //For none virgin eMMC
-#define DLDR_STATE_OS_MISC     0x53544f4DULL //"STOM"  //For none virgin eMMC//For misc dnx
-#define DLDR_STATE_FW_WIPE     0x53544657ULL //"STFW"  //For wipe out eMMC to make it like a virgin emmc
-#define DLDR_STATE_BHC_ERRR    0x53544243ULL //"STBC"  //For Battery Health Check Error
-
+#define DLDR_STATE_INVALID            0x5354494EULL //"STIN"
+#define DLDR_STATE_FW_NORMAL          0x5354464EULL //"STFN"
+#define DLDR_STATE_FW_MISC            0x5354464DULL //"STFM"  //For none virgin eMMC
+#define DLDR_STATE_OS_NORMAL          0x53544f4EULL //"STON"  //For none virgin eMMC
+#define DLDR_STATE_OS_MISC            0x53544f4DULL //"STOM"  //For none virgin eMMC//For misc dnx
+#define DLDR_STATE_FW_WIPE            0x53544657ULL //"STFW"  //For wipe out eMMC to make it like a virgin emmc
+#define DLDR_STATE_BHC_ERRR           0x53544243ULL //"STBC"  //For Battery Health Check Error
+#define MERR_EMMC_DUMP_STATE_TRANSFER 0x53545458ULL //"STTX"
 
 #define DLDR_FW_TOTAL_STEPS      72
 #define DLDR_OS_TOTAL_STEPS       9
@@ -93,15 +94,31 @@ class mrfdldrstate: public IVisitor
         , public Visitor<MrfdErHandleERRR>
         , public Visitor<MrfdFwHandleDCSDB>
         , public Visitor<MrfdFwHandleUCSDB>
+        //emmc states
+        , public Visitor<MrfdStEmmcDumpTransfer>
+        , public Visitor<MrfdEmmcDump$ACK>
+        , public Visitor<MrfdEmmcDumpNACK>
+        , public Visitor<MrfdEmmcDumpECSD>
+        , public Visitor<MrfdEmmcDumpREQB>
+        , public Visitor<MrfdEmmcDumpEOIO>
+        , public Visitor<MrfdEmmcDumpRDY$>
+        , public Visitor<MrfdEmmcDumpER40>
 {
 public:
     mrfdldrstate();
     ~mrfdldrstate();
 
     bool Init(IDevice * usbdev, MerrifieldUtils* utils);
+    void SetOptions(MerrifieldOptions *Options);
     bool DoUpdate(char* fname_dnx_fw, char* fname_fw_image, char* fname_dnx_os, \
                   char* fname_os_image, char* fname_dnx_misc, unsigned long gpflags, \
                   unsigned long usbdelayms, bool ifwiwipeenable, char *miscbin);
+    bool DoEmmcUpdate(char* emmc_fname_signed_dnx, std::string emmc_outfile, \
+                      std::string emmc_token_offset, std::string emmc_expirationdur, int emmc_partition, \
+                      long emmc_blocksize,long emmc_blockcount, long emmc_offset, bool emmc_umip_enabled, \
+                      unsigned int usb_delayms);
+
+
     bool GetOsStatus();
     bool SetIDRQstatus(bool idrq);
     bool GetFwStatus();
@@ -146,6 +163,16 @@ public:
     virtual void Visit(MrfdErHandleERRR& hdlr);
     virtual void Visit(MrfdFwHandleDCSDB& hdlr);
     virtual void Visit(MrfdFwHandleUCSDB& hdlr);
+    //start emmc
+    virtual void Visit(MrfdStEmmcDumpTransfer& hdlr);
+    virtual void Visit(MrfdEmmcDump$ACK& hdlr);
+    virtual void Visit(MrfdEmmcDumpNACK& hdlr);
+    virtual void Visit(MrfdEmmcDumpECSD& hdlr);
+    virtual void Visit(MrfdEmmcDumpREQB& hdlr);
+    virtual void Visit(MrfdEmmcDumpEOIO& hdlr);
+    virtual void Visit(MrfdEmmcDumpRDY$& hdlr);
+    virtual void Visit(MrfdEmmcDumpER40& hldr);
+    // end emmc
 
 private:
     bool WriteOutPipe(unsigned char* pbuf, uint32 size);
@@ -171,7 +198,25 @@ private:
     unsigned long long GetOpCode();
     void GotoState(unsigned long long state);
     bool UsbDevInit();
-
+    //start emmc
+    MerrifieldOptions *DeviceSpecificOptions;
+    bool doRegisterToken();
+    void transferComplete();
+    void LogError(int errorcode, std::string msg);
+    char* m_emmc_fname_signed_dnx;
+    std::string m_emmc_outfile;
+//    std::string m_emmc_unsigned_fw_dnx;
+    std::string m_emmc_token_offset;
+    std::string m_emmc_expirationdur;
+    int m_emmc_partition;
+    long m_emmc_blocksize;
+    long m_emmc_blockcount;
+    long m_emmc_offset;
+    bool m_emmc_umip_enabled;
+    bool m_emmc_register_token_enabled;
+    unsigned int m_usb_delayms;
+    bool m_perform_emmc_dump;
+    //end emmc
     char* m_fname_dnx_fw;
     char* m_fname_fw_image;
     char* m_fname_dnx_misc;

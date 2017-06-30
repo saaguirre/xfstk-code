@@ -53,17 +53,18 @@ const int FW_DATA_DNXH_CLOVERVIEWPLUS =  13; //FW dnx header
 class CloverviewPlusFW
 {
 public:
-        CloverviewPlusFW();
-        ~CloverviewPlusFW();
-	bool Init(char* fname_dnx_fw, char* fname_fw_image, 
-                                        CloverviewPlusUtils* utils, unsigned long gpflags, bool enable_ifwi_wipe);
-        dnx_data* GetFwImageData(unsigned long index);
+    CloverviewPlusFW();
+    ~CloverviewPlusFW();
+    bool Init(char* fname_dnx_fw, char* fname_fw_image,
+              CloverviewPlusUtils* utils, unsigned long gpflags,
+              bool enable_ifwi_wipe, bool perform_emmc_dump);
+    dnx_data* GetFwImageData(unsigned long index);
 
 private:
-	bool InitDnx();
-	bool InitDnxHdr();
-	bool InitFwImage(bool enable_ifwi_wipe);
-	bool InitNoSize();
+    bool InitDnx();
+    bool InitDnxHdr();
+    bool InitFwImage(bool enable_ifwi_wipe);
+    bool InitNoSize();
     bool CheckFile(char *filename);
     void LogError(int errorcode);
     void InitFuphHeaderData();

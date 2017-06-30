@@ -34,27 +34,27 @@
 #define ONE41_KB                   (1024 * 141)
 #define TWO_HUNDRED_KB             (1024 * 200)
 #define SIXTY_FIVE_KB              (1024 * 65)
-#define SEVENTY_TWO_KB              (1024 * 72)
+#define SEVENTY_TWO_KB             (1024 * 72)
 #define FIVE_KB                    (1024 * 5)
-#define SIXTEEN_KB                    (1024 * 16)
+#define SIXTEEN_KB                 (1024 * 16)
 #define ONE_HUNDRED_KB             (1024 * 100)
-#define FW_USB_IMAGE_SIZE           0x40800
-#define DNX_FW_SIZE_HDR_SIZE		0x18
-#define MERRIFIELD_FW_UPDATE_PROFILE_HDR_SIZE   0x90
-#define MERRIFIELD_B0_FW_UPDATE_PROFILE_HDR_SIZE   0xA4
-#define D0_FW_UPDATE_PROFILE_HDR_SIZE           0x24
-#define C0_FW_UPDATE_PROFILE_HDR_SIZE           0x20
-#define FW_UPDATE_PROFILE_OLD_HDR_SIZE_MRFD          0x1C
-#define VRL_HEADER_SIZE                         0x2D8
-#define CDPH_HEADER_SIZE                        0x200
-#define CDPH_HEADER_OFFSET                      (1024 * 170)
+#define FW_USB_IMAGE_SIZE          0x40800
+#define DNX_FW_SIZE_HDR_SIZE       0x18
+#define MERRIFIELD_FW_UPDATE_PROFILE_HDR_SIZE    0x90
+#define MERRIFIELD_B0_FW_UPDATE_PROFILE_HDR_SIZE 0xA4
+#define D0_FW_UPDATE_PROFILE_HDR_SIZE            0x24
+#define C0_FW_UPDATE_PROFILE_HDR_SIZE            0x20
+#define FW_UPDATE_PROFILE_OLD_HDR_SIZE_MRFD      0x1C
+#define VRL_HEADER_SIZE                          0x2D8
+#define CDPH_HEADER_SIZE                         0x200
+#define CDPH_HEADER_OFFSET                       (1024 * 170)
 
-#define PSFW1_SIZE_OFFSET			0x0C
-#define PSFW2_SIZE_OFFSET			0x10
-#define SSFW_SIZE_OFFSET			0x14
-#define ROM_PATCH_SIZE_OFFSET                   0x18
+#define PSFW1_SIZE_OFFSET     0x0C
+#define PSFW2_SIZE_OFFSET     0x10
+#define SSFW_SIZE_OFFSET      0x14
+#define ROM_PATCH_SIZE_OFFSET 0x18
 
-#define PREAMBLE_RETRY_TIMEOUT		86400000 	//24hours default timeout, might be variable in SMIP header later
+#define PREAMBLE_RETRY_TIMEOUT 86400000 	//24hours default timeout, might be variable in SMIP header later
 
 // opp codes
 #define OPP_FW                  0
@@ -76,63 +76,81 @@
 
 // Serial Start
 #define SERIAL_START       0x536F5478ULL      // Serial     'SoTx'
+
+// EMMC
+#define BULK_ACK_RDY$               0x52445924ULL        // 'RDY$'
+#define EMMC_DUMP_ACK               0x2441434BULL        // '$ACK'
+#define EMMC_DUMP_NACK              0x4E41434BULL        // 'NACK'
+#define EMMC_DUMP_ECSD              0x45435344ULL        // 'ECSD'
+#define EMMC_DUMP_SPR$              0x53505224ULL        // 'SPR$'
+#define EMMC_DUMP_REQB              0x52455142ULL        // 'REQB'
+#define EMMC_DUMP_EOIO              0x454F494FULL        // 'EOIO'
+#define EMMC_DUMP_NOSN              0x4E4F534EULL        // 'NOSN'
+
+
 // FW Upgrade Ack values
-#define BULK_ACK_DFRM     			0x4446524DULL        // 'DFRM'
-#define BULK_ACK_DxxM     			0x4478784DULL        // 'DxxM'
-#define BULK_ACK_DXBL		        0x4458424CULL        // 'DXBL'	//Used by OS Recovery too
+#define BULK_ACK_DFRM               0x4446524DULL        // 'DFRM'
+#define BULK_ACK_DxxM               0x4478784DULL        // 'DxxM'
+#define BULK_ACK_DXBL               0x4458424CULL        // 'DXBL'	//Used by OS Recovery too
 //#define BULK_ACK_CH00		        0x43483030ULL        // 'CH00'	//MRD CHFI00
-#define BULK_ACK_DCFI00		        0x444346493030ULL        // 'DCFI00'	//MRD CHFI00
-#define BULK_ACK_READY_UPH_SIZE    	0x5255504853ULL      // 'RUPHS'
-#define BULK_ACK_READY_UPH	     	0x52555048ULL        // 'RUPH'
-#define BULK_ACK_GPP_RESET	     	0x5245534554ULL      // 'RESET'
+#define BULK_ACK_DCFI00             0x444346493030ULL    // 'DCFI00'	//MRD CHFI00
+#define BULK_ACK_READY_UPH_SIZE     0x5255504853ULL      // 'RUPHS'
+#define BULK_ACK_READY_UPH          0x52555048ULL        // 'RUPH'
+#define BULK_ACK_GPP_RESET          0x5245534554ULL      // 'RESET'
 //#define BULK_ACK_DMIP		        0x444D4950ULL        // 'DMIP'
-#define BULK_ACK_UPDATE_SUCESSFUL	0x484C5424ULL        // 'HLT$'
+#define BULK_ACK_UPDATE_SUCESSFUL   0x484C5424ULL        // 'HLT$'
 #define BULK_ACK_MFLD               0x4D464C44ULL        // 'MFLD'
 #define BULK_ACK_CLVT               0x434C5654ULL        // 'CLVT'
 #define BULK_ACK_RTBD               0x52544244ULL        // 'RTBD'
 #define BULK_ACK_DIFWI              0x4449465749ULL      // 'DIFWI
 
-
-
 #define BULK_ACK_INVALID_PING       0x45523030ULL        // 'ER00'
-#define BULK_ACK_HLT0		        0x484C5430ULL        // 'HLT0'
-#define BULK_ACK_ER01		        0x45523031ULL        // 'ER01'
-#define BULK_ACK_ER02		        0x45523032ULL        // 'ER02'
-#define BULK_ACK_ER03		        0x45523033ULL        // 'ER03'
-#define BULK_ACK_ER04		        0x45523034ULL        // 'ER04'
-#define BULK_ACK_ER06		        0x45523036ULL        // 'ER06'
-#define BULK_ACK_ER07		        0x45523037ULL        // 'ER07'
-#define BULK_ACK_ER10		        0x45523130ULL        // 'ER10'
-#define BULK_ACK_ER11		        0x45523131ULL        // 'ER11'
-#define BULK_ACK_ER12		        0x45523132ULL        // 'ER12'
-#define BULK_ACK_ER13		        0x45523133ULL        // 'ER13'
-#define BULK_ACK_ER15		        0x45523135ULL        // 'ER15'
-#define BULK_ACK_ER16		        0x45523136ULL        // 'ER16'
-#define BULK_ACK_ER17		        0x45523137ULL        // 'ER17'
-#define BULK_ACK_ER18		        0x45523138ULL        // 'ER18'
-#define BULK_ACK_ER20		        0x45523230ULL        // 'ER20'
-#define BULK_ACK_ER21		        0x45523231ULL        // 'ER21'
-#define BULK_ACK_ER22		        0x45523232ULL        // 'ER22'
-#define BULK_ACK_ER25		        0x45523235ULL        // 'ER25'
-#define BULK_ACK_ER26		        0x45523236ULL        // 'ER26'
-#define BULK_ACK_ERRR		        0x45525252ULL        // 'ERRR'
-#define BULK_ACK_ERB0		        0x45524230ULL        // 'ERB0'
-#define BULK_ACK_ERB1		        0x45524231ULL        // 'ERB1'
+#define BULK_ACK_HLT0               0x484C5430ULL        // 'HLT0'
+#define BULK_ACK_ER01               0x45523031ULL        // 'ER01'
+#define BULK_ACK_ER02               0x45523032ULL        // 'ER02'
+#define BULK_ACK_ER03               0x45523033ULL        // 'ER03'
+#define BULK_ACK_ER04               0x45523034ULL        // 'ER04'
+#define BULK_ACK_ER06               0x45523036ULL        // 'ER06'
+#define BULK_ACK_ER07               0x45523037ULL        // 'ER07'
+#define BULK_ACK_ER10               0x45523130ULL        // 'ER10'
+#define BULK_ACK_ER11               0x45523131ULL        // 'ER11'
+#define BULK_ACK_ER12               0x45523132ULL        // 'ER12'
+#define BULK_ACK_ER13               0x45523133ULL        // 'ER13'
+#define BULK_ACK_ER15               0x45523135ULL        // 'ER15'
+#define BULK_ACK_ER16               0x45523136ULL        // 'ER16'
+#define BULK_ACK_ER17               0x45523137ULL        // 'ER17'
+#define BULK_ACK_ER18               0x45523138ULL        // 'ER18'
+#define BULK_ACK_ER20               0x45523230ULL        // 'ER20'
+#define BULK_ACK_ER21               0x45523231ULL        // 'ER21'
+#define BULK_ACK_ER22               0x45523232ULL        // 'ER22'
+#define BULK_ACK_ER25               0x45523235ULL        // 'ER25'
+#define BULK_ACK_ER26               0x45523236ULL        // 'ER26'
+#define BULK_ACK_ER40               0x45523430ULL        //ER40 – Initialize eMMC HW and Card failed
+#define BULK_ACK_ER41               0x45523431ULL        //ER41 – Error response to “REQB” in case failure reading from eMMC or invalid block size
+#define BULK_ACK_ER42               0x45523432ULL        //ER42 – Error response to “SPR$” in case partition access is not allowed
+#define BULK_ACK_ER43               0x45523433ULL        //ER43 – Error response to “SPR$” in case access token mismatched
+#define BULK_ACK_ER44               0x45523434ULL        //ER44 – Error response to “SPR$” in case access token has expired
+#define BULK_ACK_ER45               0x45523435ULL        //ER45 – Error response to “SPR$” in case failure during eMMC partition switching
+#define BULK_ACK_ER46               0x45523436ULL        //ER46 – Error response to “ECSD” in case failure reading ext CSD from eMMC
+
+#define BULK_ACK_ERRR               0x45525252ULL        // 'ERRR'
+#define BULK_ACK_ERB0               0x45524230ULL        // 'ERB0'
+#define BULK_ACK_ERB1               0x45524231ULL        // 'ERB1'
 
 // OS Recovery Ack values
-#define BULK_ACK_DORM     			0x444F524DULL        // 'DORM'
-#define BULK_ACK_OSIPSZ    			0x4F53495020537AULL  // 'OSIP Sz'
-#define BULK_ACK_ROSIP     			0x524F534950ULL      // 'ROSIP'
-#define BULK_ACK_DONE		        0x444F4E45ULL        // 'DONE'
-#define BULK_ACK_RIMG				0x52494D47ULL		  // 'RIMG'
-#define BULK_ACK_EOIU				0x454F4955ULL		  // 'EOIU'
+#define BULK_ACK_DORM               0x444F524DULL        // 'DORM'
+#define BULK_ACK_OSIPSZ             0x4F53495020537AULL  // 'OSIP Sz'
+#define BULK_ACK_ROSIP              0x524F534950ULL      // 'ROSIP'
+#define BULK_ACK_DONE               0x444F4E45ULL        // 'DONE'
+#define BULK_ACK_RIMG               0x52494D47ULL        // 'RIMG'
+#define BULK_ACK_EOIU               0x454F4955ULL        // 'EOIU'
 
-#define BULK_ACK_DCSDB    0x4443534442ULL
-#define BULK_ACK_UCSDB     0x5543534442ULL
+#define BULK_ACK_DCSDB              0x4443534442ULL
+#define BULK_ACK_UCSDB              0x5543534442ULL
 
-#define MAX_ACK_CODE_MERRIFIIELD 	36
+#define MAX_ACK_CODE_MERRIFIIELD    41
 
-#define MAX_ERROR_CODE                  45
+#define MAX_ERROR_CODE              45
 #define OSIP_PARTITIONTABLE_SIZE    0x200
 
 // OS Recovery HOST Commands

@@ -27,6 +27,7 @@
 
 
 #define MAX_BUFFER_SIZE                 16384 //16K
+#define TMP_BUFFER_SIZE                 65536 //64K
 
 #if defined XFSTK_OS_WIN_MSVC
 #define __PRETTY_FUNCTION__ __FUNCTION__

@@ -202,5 +202,72 @@ public:
     ADD_ACCEPT_FUNC()
 };
 
+//start emmc
+class MrfdStEmmcDumpTransfer: public IBaseVisitable<>
+{
+public:
+    ADD_ACCEPT_FUNC()
+};
+
+class MrfdEmmcDump$ACK: public IBaseVisitable<>
+{
+public:
+    ADD_ACCEPT_FUNC()
+};
+
+class MrfdEmmcDumpNACK: public IBaseVisitable<>
+{
+public:
+    ADD_ACCEPT_FUNC()
+};
+
+class MrfdEmmcDumpECSD: public IBaseVisitable<>
+{
+public:
+    ADD_ACCEPT_FUNC()
+};
+
+class MrfdEmmcDumpSPR$: public IBaseVisitable<>
+{
+public:
+    ADD_ACCEPT_FUNC()
+};
+
+class MrfdEmmcDumpREQB: public IBaseVisitable<>
+{
+public:
+    ADD_ACCEPT_FUNC()
+};
+
+class MrfdEmmcDumpEOIO: public IBaseVisitable<>
+{
+public:
+    ADD_ACCEPT_FUNC()
+};
+
+class MrfdEmmcDumpFwHandleDFRM: public IBaseVisitable<>
+{
+public:
+    ADD_ACCEPT_FUNC()
+};
+
+class MrfdEmmcDumpStHandleFwNormal: public IBaseVisitable<>
+{
+public:
+    ADD_ACCEPT_FUNC()
+};
+
+class MrfdEmmcDumpRDY$: public IBaseVisitable<>
+{
+public:
+    ADD_ACCEPT_FUNC()
+};
+
+class MrfdEmmcDumpER40: public IBaseVisitable<>
+{
+public:
+    ADD_ACCEPT_FUNC()
+};
+// end emmc
 
 #endif // MRFDLDRHANDLER_H

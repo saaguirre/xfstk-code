@@ -36,6 +36,19 @@ private:
     string miscDnxPath;
     string miscBinPath;
     string csdbStatus;
+    //emmc start, added only for parsing reasons
+    string file;
+    string uFwDnx;
+    int partition;
+    long blockSize;
+    long blockCount;
+    long offset;
+    string tokenOffset;
+    string expirationDuration;
+    bool umipdump;
+    bool m_isRegisterToken;
+    bool performEmmcDump;
+    //emmc end
     unsigned int gpFlags;
     unsigned int debugLevel;
     unsigned int usbdelayms;

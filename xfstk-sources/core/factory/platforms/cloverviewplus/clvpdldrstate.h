@@ -27,6 +27,7 @@
 #include "../../interfaces/ivisitor.h"
 #include "cloverviewplusfw.h"
 #include "cloverviewplusos.h"
+#include "cloverviewplusoptions.h"
 #include "../../interfaces/idevice.h"
 #include "../../interfaces/idownloader.h"
 #include "clvpdldrhandler.h"
@@ -46,6 +47,7 @@ class softfusesFW;
 #define DLDR_STATE_FW_WIPE     0x53544657ULL //"STFW"  //For wipe out eMMC to make it like a virgin emmc
 #define DLDR_STATE_SOFT_FUSES  0x53545346ULL //"STSF"
 #define DLDR_STATE_BHC_ERRR    0x53544243ULL //"STBC"  //For Battery Health Check Error
+#define CLVP_EMMC_DUMP_STATE_TRANSFER 0x53545458ULL //"STTX"
 
 #define DLDR_FW_TOTAL_STEPS_CLVP 23
 
@@ -94,16 +96,29 @@ class ClvpDldrState: public IVisitor
         , public Visitor<ClvpErHandleLogError>
         , public Visitor<ClvpErHandleERRR>
         , public Visitor<ClvpStHandleSoftFuses>
-
+        //emmc states
+        , public Visitor<ClvpStEmmcDumpTransfer>
+        , public Visitor<ClvpEmmcDump$ACK>
+        , public Visitor<ClvpEmmcDumpNACK>
+        , public Visitor<ClvpEmmcDumpECSD>
+        , public Visitor<ClvpEmmcDumpREQB>
+        , public Visitor<ClvpEmmcDumpEOIO>
+        , public Visitor<ClvpEmmcDumpRDY$>
+        , public Visitor<ClvpEmmcDumpER40>
 {
 public:
     ClvpDldrState();
     ~ClvpDldrState();
 
     bool Init(IDevice * usbdev, CloverviewPlusUtils* utils);
+    void SetOptions(CloverviewPlusOptions *Options);
     bool DoUpdate(char* fname_dnx_fw, char* fname_fw_image, char* fname_softfuses_bin, char* fname_dnx_os, \
                   char* fname_os_image, char* fname_dnx_misc, unsigned long gpflags, \
-				  unsigned long usbdelayms, bool ifwiwipeenable);
+                  unsigned long usbdelayms, bool ifwiwipeenable);
+    bool DoEmmcUpdate(char* emmc_fname_signed_dnx, std::string emmc_outfile, \
+                      std::string emmc_token_offset, std::string emmc_expirationdur, int emmc_partition, \
+                      long emmc_blocksize,long emmc_blockcount, long emmc_offset, bool emmc_umip_enabled, \
+                      unsigned int usb_delayms);
     bool GetOsStatus();
     bool GetFwStatus();
     bool GetSFStatus();
@@ -157,6 +172,16 @@ public:
     virtual void Visit(ClvpStHandleSoftFuses& hdlr);
     virtual void Visit(ClvpErHandleLogError& hdlr);
     virtual void Visit(ClvpErHandleERRR& hdlr);
+    //start emmc
+    virtual void Visit(ClvpStEmmcDumpTransfer& hdlr);
+    virtual void Visit(ClvpEmmcDump$ACK& hdlr);
+    virtual void Visit(ClvpEmmcDumpNACK& hdlr);
+    virtual void Visit(ClvpEmmcDumpECSD& hdlr);
+    virtual void Visit(ClvpEmmcDumpREQB& hdlr);
+    virtual void Visit(ClvpEmmcDumpEOIO& hdlr);
+    virtual void Visit(ClvpEmmcDumpRDY$& hdlr);
+    virtual void Visit(ClvpEmmcDumpER40& hldr);
+    // end emmc
 
 private:
     bool WriteOutPipe(unsigned char* pbuf, uint32 size);
@@ -181,13 +206,32 @@ private:
     unsigned long long GetOpCode();
     void GotoState(unsigned long long state);
     bool UsbDevInit();
+    //start emmc
+    CloverviewPlusOptions *DeviceSpecificOptions;
+    bool doRegisterToken();
+    void transferComplete();
+    void LogError(int errorcode, std::string msg);
+    std::string m_emmc_fname_signed_dnx;
+    std::string m_emmc_outfile;
+    std::string m_emmc_unsigned_fw_dnx;
+    std::string m_emmc_token_offset;
+    std::string m_emmc_expirationdur;
+    int m_emmc_partition;
+    long m_emmc_blocksize;
+    long m_emmc_blockcount;
+    long m_emmc_offset;
+    bool m_emmc_umip_enabled;
+    bool m_emmc_register_token_enabled;
+    unsigned int m_usb_delayms;
+    bool m_perform_emmc_dump;
+    //end emmc
 
     char* m_fname_dnx_fw;
     char* m_fname_fw_image;
     char* m_fname_dnx_misc;
     char* m_fname_dnx_os;
     char* m_fname_os_image;
-    char* m_fname_softfuses_bin;
+    string m_fname_softfuses_bin;
     unsigned long m_gpflags;
     IDevice * m_usbdev;
     CloverviewPlusUtils* m_utils;

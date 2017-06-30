@@ -86,7 +86,7 @@ CloverviewPlusUtils::CloverviewPlusUtils()
     this->validstatusclientdata = NULL;
     this->validstatuspfn = NULL;
     this->isDebug = 0x0;
-    this->tmpmsg = new char[2048];
+    this->tmpmsg = new char[TMP_BUFFER_SIZE];
     memset((this->usbsn),0,128);
 }
 CloverviewPlusUtils::~CloverviewPlusUtils()
@@ -198,64 +198,73 @@ int CloverviewPlusUtils::strstr_lowercase_strip(char szBuff[], const char *keywo
 ULONGLONG CloverviewPlusUtils::scan_string_for_protocol(char szBuff[])
 {
     ULONGLONG keywords_as_ulonglong[MAX_ACK_CODE_CLOVERVIEWPLUS] = {
-        SERIAL_START,
+        SERIAL_START,                         //0
 
-                BULK_ACK_DFRM,
-                BULK_ACK_DxxM,
-                BULK_ACK_DORM,
-                BULK_ACK_MFLD,
-                BULK_ACK_CLVT,
+                BULK_ACK_DFRM,                //1
+                BULK_ACK_DxxM,                //2
+                BULK_ACK_DORM,                //3
+                BULK_ACK_MFLD,                //4
+                BULK_ACK_CLVT,                //5
 
-                BULK_ACK_DXBL,
-                BULK_ACK_READY_UPH_SIZE,
-                BULK_ACK_READY_UPH,
-                BULK_ACK_DMIP,
-                BULK_ACK_LOFW,
-                BULK_ACK_HIFW,
-                BULK_ACK_PSFW1,
-                BULK_ACK_PSFW2,
-                BULK_ACK_SSFW,
-                BULK_ACK_PATCH,
-                BULK_ACK_VEDFW,
-                BULK_ACK_SSBS,
-                BULK_ACK_IFW1,
-                BULK_ACK_IFW2,
-                BULK_ACK_IFW3,
-                BULK_ACK_GPP_RESET,
+                BULK_ACK_DXBL,                //6
+                BULK_ACK_READY_UPH_SIZE,      //7
+                BULK_ACK_READY_UPH,           //8
+                BULK_ACK_DMIP,                //9
+                BULK_ACK_LOFW,                //10
+                BULK_ACK_HIFW,                //11
+                BULK_ACK_PSFW1,               //12
+                BULK_ACK_PSFW2,               //13
+                BULK_ACK_SSFW,                //14
+                BULK_ACK_PATCH,               //15
+                BULK_ACK_VEDFW,               //16
+                BULK_ACK_SSBS,                //17
+                BULK_ACK_IFW1,                //18
+                BULK_ACK_IFW2,                //19
+                BULK_ACK_IFW3,                //20
+                BULK_ACK_GPP_RESET,           //21
+
+                //emmc dump
+                BULK_ACK_RDY$,                //22
+                EMMC_DUMP_ACK,                //23
+                EMMC_DUMP_NACK,               //24
+                EMMC_DUMP_EOIO,               //25
+                BULK_ACK_ER40,                //26
+
                 //OS
-                BULK_ACK_OSIPSZ,
-                BULK_ACK_ROSIP,
-                BULK_ACK_DONE,
-                BULK_ACK_RIMG,
-                BULK_ACK_EOIU,
+                BULK_ACK_OSIPSZ,              //27
+                BULK_ACK_ROSIP,               //28
+                BULK_ACK_DONE,                //29
+                BULK_ACK_RIMG,                //30
+                BULK_ACK_EOIU,                //31
+
                 //Error codes
-                BULK_ACK_UPDATE_SUCESSFUL,
-                BULK_ACK_INVALID_PING,
-                BULK_ACK_HLT0,
-                BULK_ACK_ER01,
-                BULK_ACK_ER02,
-                BULK_ACK_ER03,
-                BULK_ACK_ER04,
-                BULK_ACK_ER10,
-                BULK_ACK_ER11,
-                BULK_ACK_ER12,
-                BULK_ACK_ER13,
-                BULK_ACK_ER15,
-                BULK_ACK_ER16,
-                BULK_ACK_ER17,
-                BULK_ACK_ER18,
-                BULK_ACK_ER20,
-                BULK_ACK_ER21,
-                BULK_ACK_ER22,
-                BULK_ACK_ER25,
-                BULK_ACK_ERRR,
-                BULK_ACK_RTBD,
-                BULK_ACK_ER30,
-                BULK_ACK_ER32,
-                BULK_ACK_ER14,
-                BULK_ACK_READY_SFUSE_UPH_SIZE,
-                BULK_ACK_READY_SFUSE_UPH,
-                BULK_ACK_DSKF
+                BULK_ACK_UPDATE_SUCESSFUL,    //32
+                BULK_ACK_INVALID_PING,        //33
+                BULK_ACK_HLT0,                //34
+                BULK_ACK_ER01,                //35
+                BULK_ACK_ER02,                //36
+                BULK_ACK_ER03,                //37
+                BULK_ACK_ER04,                //38
+                BULK_ACK_ER10,                //39
+                BULK_ACK_ER11,                //40
+                BULK_ACK_ER12,                //41
+                BULK_ACK_ER13,                //42
+                BULK_ACK_ER15,                //43
+                BULK_ACK_ER16,                //44
+                BULK_ACK_ER17,                //45
+                BULK_ACK_ER18,                //46
+                BULK_ACK_ER20,                //47
+                BULK_ACK_ER21,                //48
+                BULK_ACK_ER22,                //49
+                BULK_ACK_ER25,                //50
+                BULK_ACK_ERRR,                //51
+                BULK_ACK_RTBD,                //52
+                BULK_ACK_ER30,                //53
+                BULK_ACK_ER32,                //54
+                BULK_ACK_ER14,                //55
+                BULK_ACK_READY_SFUSE_UPH_SIZE,//56
+                BULK_ACK_READY_SFUSE_UPH,     //57
+                BULK_ACK_DSKF                 //58
         };
 
     int index = index_of_keyword(szBuff, StepID);
@@ -271,64 +280,73 @@ int CloverviewPlusUtils::index_of_keyword(char szBuff[], int start_index)
     int result = -1;
     int getChunkID = 0;
     const char * keywords[MAX_ACK_CODE_CLOVERVIEWPLUS] = {
-        "SoTx",
+        "SoTx",     //0
 
-        "DFRM",
-        "DxxM",
-        "DORM",
-        "MFLD",
-        "CLVT",
+        "DFRM",     //1
+        "DxxM",     //2
+        "DORM",     //3
+        "MFLD",     //4
+        "CLVT",     //5
 
-        "DXBL",
-        "RUPHS",
-        "RUPH",
-        "DMIP",
-        "LOFW",
-        "HIFW",
-        "PSFW1",
-        "PSFW2",
-        "SSFW",
-        "SuCP",
-        "VEDFW",
-        "SSBS",
-        "IFW1",
-        "IFW2",
-        "IFW3",
-        "RESET",
+        "DXBL",     //6
+        "RUPHS",    //7
+        "RUPH",     //8
+        "DMIP",     //9
+        "LOFW",     //10
+        "HIFW",     //11
+        "PSFW1",    //12
+        "PSFW2",    //13
+        "SSFW",     //14
+        "SuCP",     //15
+        "VEDFW",    //16
+        "SSBS",     //17
+        "IFW1",     //18
+        "IFW2",     //19
+        "IFW3",     //20
+        "RESET",    //21
+
+        //emmc dump
+        "RDY$",     //22
+        "$ACK",     //23
+        "NACK",     //24
+        "EOIO",     //25
+        "ER40",     //26
+
         //OS
-        "OSIP Sz",
-        "ROSIP",
-        "DONE",
-        "RIMG",
-        "EOIU",
+        "OSIP Sz",  //27
+        "ROSIP",    //28
+        "DONE",     //29
+        "RIMG",     //30
+        "EOIU",     //31
+
         //Error Codes
-        "HLT$",
-        "ER00",
-        "HLT0",
-        "ER01",
-        "ER02",
-        "ER03",
-        "ER04",
-        "ER10",
-        "ER11",
-        "ER12",
-        "ER13",
-        "ER15",
-        "ER16",
-        "ER17",
-        "ER18",
-        "ER20",
-        "ER21",
-        "ER22",
-        "ER25",
-        "ERRR",
-        "RTBD",
-        "ER30",
-        "ER32",
-        "ER14",
-        "RSUPHS",
-        "RSUPH",
-        "DSKF"
+        "HLT$",     //32
+        "ER00",     //33
+        "HLT0",     //34
+        "ER01",     //35
+        "ER02",     //36
+        "ER03",     //37
+        "ER04",     //38
+        "ER10",     //39
+        "ER11",     //40
+        "ER12",     //41
+        "ER13",     //42
+        "ER15",     //43
+        "ER16",     //44
+        "ER17",     //45
+        "ER18",     //46
+        "ER20",     //47
+        "ER21",     //48
+        "ER22",     //49
+        "ER25",     //50
+        "ERRR",     //51
+        "RTBD",     //52
+        "ER30",     //53
+        "ER32",     //54
+        "ER14",     //55
+        "RSUPHS",   //56
+        "RSUPH",    //57
+        "DSKF"      //58
     };
 
     for(int i=start_index; i< MAX_ACK_CODE_CLOVERVIEWPLUS; i++){
@@ -380,7 +398,7 @@ void CloverviewPlusUtils::u_log(uint32 logLevel, string message, ...)
         if (isDebug & logLevel)
         {
 
-            memset(tmpmsg,0,2048);
+            memset(tmpmsg,0,TMP_BUFFER_SIZE );
             va_list ap;
             va_start(ap, message);
             vsprintf(tmpmsg,fmtMsg_port.c_str(), ap);

@@ -46,7 +46,6 @@ private:
     bool            bUSBconfigured;
     bool            bsocketconfigured;
     bool            b_usbinitok;
-    //USBDevice       usb_dev;
     IDevice *CurrentDownloaderDevice;
     CloverviewPlusUtils   libutils;
     ClvpDldrState m_dldr_state;
@@ -59,16 +58,9 @@ private:
     int b_IDRQ;
     IOptions *CurrentDownloaderOptions;
     CloverviewPlusOptions *DeviceSpecificOptions;
+    void do_emmc_update(CloverviewPlusOptions* options);
     void do_update(CloverviewPlusOptions* options);
-    void do_update(
-        char * dnx_fw_name,
-        char * fw_image_name,
-        char * softfuses_bin_name,
-        char * dnx_os_name,
-        char * os_image_name,
-        char * dnx_misc_name,
-        unsigned int gpflags
-        );
+
     void cleanup();
     bool abort;
 

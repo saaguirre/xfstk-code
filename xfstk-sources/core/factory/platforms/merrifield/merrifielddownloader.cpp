@@ -71,9 +71,17 @@ bool MerrifieldDownloader::UpdateTarget()
     this->libutils.u_log(LOG_ENTRY, "%s", __PRETTY_FUNCTION__);
     bool RetVal = false;
     bool OsDownloadRequested = false;
-    if(this->CurrentDownloaderOptions == NULL ||
-            this->CurrentDownloaderDevice == NULL) {
+    if(this->CurrentDownloaderOptions == NULL || this->CurrentDownloaderDevice == NULL)
+    {
         return RetVal;
+    }
+
+    if(this->DeviceSpecificOptions->IsPerformEmmcDumpEnabled())
+    {
+        this->Init();
+        this->do_emmc_update(this->DeviceSpecificOptions);
+        this->libutils.u_log(LOG_STATUS, "EMMC-DUMP: Download completed.");
+        return true;
     }
 
     this->libutils.u_log(LOG_DOWNLOADER, "FWDnxPath -- %s", this->DeviceSpecificOptions->GetFWDnxPath());
@@ -96,11 +104,13 @@ bool MerrifieldDownloader::UpdateTarget()
         return false;
 
     unsigned long inputflags = this->DeviceSpecificOptions->GetGPFlags();
-    if(inputflags & 0x00000001) {
+    if(inputflags & 0x00000001)
+    {
         this->b_continue_to_OS = true;
         OsDownloadRequested = true;
     }
-    else {
+    else
+    {
         this->b_continue_to_OS = false;
     }
 
@@ -256,6 +266,26 @@ void MerrifieldDownloader::do_abort()
 void MerrifieldDownloader::cleanup()
 {
     this->libutils.u_log(LOG_ENTRY, "%s", __PRETTY_FUNCTION__);
+}
+
+void MerrifieldDownloader::do_emmc_update(MerrifieldOptions* options)
+{
+    this->libutils.u_log(LOG_ENTRY, "%s", __PRETTY_FUNCTION__);
+    m_dldr_state.Init(this->CurrentDownloaderDevice, &this->libutils);
+    m_dldr_state.SetOptions(options);
+    m_dldr_state.DoEmmcUpdate(
+                            (PSTR)options->GetFWDnxPath(),
+                            options->GetEmmcFile(),
+                            options->GetEmmcTokenOffset(),
+                            options->GetEmmcExpirationDur(),
+                            options->GetEmmcPartition(),
+                            options->GetEmmcBlockSize(),
+                            options->GetEmmcBlockCount(),
+                            options->GetEmmcOffset(),
+                            options->IsEmmcUmipDumpEnabled(),
+                            options->GetUsbdelayms()
+                          );
+    this->do_abort();
 }
 
 void MerrifieldDownloader::do_update(MerrifieldOptions* options)

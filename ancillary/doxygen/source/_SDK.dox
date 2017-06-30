@@ -1,4 +1,4 @@
-/*!
+rich/*!
  *  \file xfstk-doxygen.cpp
  *  \brief General documentation file for xFSTK.
 */
@@ -89,16 +89,30 @@
 			<td>File path for the OS image</td>
 		</tr>
 		<tr>
-			<td><b>--softfuse arg (=BLANK.bin)</b></td>
-			<td>File path for the Softfuse Binary</td>
-		</tr>
-		<tr>
 			<td><b>--miscdnx arg</b></td>
 			<td>File path for miscellaneous DNX module</td>
 		</tr>
 		<tr>
 			<td><b>--gpflags arg (=0x80000000)</b></td>
 			<td>Optional argument. 32 Bit Hex Value of the GPFlags.</td>
+		</tr>
+		<tr>
+			<td><b>-r [ --rev ]</b></td>
+			<td>version/revision</td>
+		</tr>
+		<tr>
+			<td><b>-v [ --verbose ]</b></td>
+			<td>
+				<p>Optional argument. Display debug information.</p>
+			</td>
+		</tr>
+		<tr>
+			<td><b>--softfuse arg (=BLANK.bin)</b></td>
+			<td>Optioanl CLVP Only argument.File path for the Softfuse Binary</td>
+		</tr>
+		<tr>
+			<td><b>--miscbin </b></td>
+			<td>MERR/MOFD Only argument. File path for miscellaneous binary file </td>
 		</tr>
 		<tr>
 			<td><b>--debuglevel arg (=0xffffffff)</b></td>
@@ -108,6 +122,54 @@
                         <td><b>--usbdelayms arg (<500)</b></td>
                         <td>Optional argument. 32 bit int value to set the usbdelayms, default 0ms</td>
 		</tr>
+		<tr>
+			<td><b>--emmcdump arg</b></td>
+			<td>CLVP/MOFD only - Optional argument. Indicate whether to perform an emmc dump. Set to false by default</td>
+		</tr>
+		<tr>
+			<td><b>-f [ --file ] </b></td>
+			<td>CLVP/MOFD eMMc - Output file name</td>
+		</tr>
+		<tr>
+			<td><b>-p [ --partition ] </b></td>
+			<td>CLVP/MOFD only eMMc - 0 - user partition; 1- boot partition-1; 2 - boot partition-2;3 - E-CSD</td>
+		</tr>
+		<tr>
+			<td><b>-b [ --blocksize ] </b></td>
+			<td>CLVP/MOFD only eMMc - size of blocks to read (applicable for partitions 0-2</td>
+		</tr>
+		<tr>
+			<td><b>-c [ --blockcount ] </b></td>
+			<td>CLVP/MOFD only eMMc -number of blocks to read (applicable for partitions 0-2</td>
+		</tr>
+		<tr>
+			<td><b>-o [ --offset ] </b></td>
+			<td>CLVP/MOFD only eMMc - offset from base of partition to begin reading (applicable for partitions 0-2</td>
+		</tr>
+		<tr>
+			<td><b>--register</b></td>
+			<td>CLVP/MOFD only eMMc - Register Token</td>
+		</tr>
+		<tr>
+			<td><b>-u [ --ufwdnx ] </b></td>
+			<td>CLVP/MOFD only eMMc - Unsigned DnX</td>
+		</tr>
+		<tr>
+			<td><b>-t [tokenoffset]</b></td>
+			<td>CLVP/MOFD only eMMc - Token offset for the unsigned DnX. (Default offset: 0x0108</td>
+		</tr>
+		<tr>
+			<td><b>-e [ --expirationduration ] </b></td>
+			<td>
+			<p>CLVP/MOFD only eMMc - Time duration of the token to be valid. </p>
+			<p>Supported format shall be a string which starts with a numeric number followed by</p>
+			<p>h/d/m/y (h for hour, d for day, m for month and y for year</td></p>
+			</td>
+		</tr>
+		<tr>
+			<td><b>--umipdump</b></td>
+			<td>CLVP/MOFD only - UMIP dumping. Default value 0 (disable). Set to 1 to enable</td>
+		</td>
 		<tr>
 			<td><b>--wipeifwi </b></td>
 			<td>Optional argument. Indicate whether to wipe out ifwi image on emmc. Set to false by default</td>
@@ -125,37 +187,23 @@
 			</td>
 		</tr>
 		<tr>
-			<td><b>-v [ --verbose ]</b></td>
-			<td>
-				<p>Optional argument. Display debug information.</p>
-			</td>
-		</tr>
-		<tr>
-			<td><b>-r [ --rev ]</b></td>
-			<td>version/revision</td>
-		</tr>
-		<tr>
-			<td><b>--miscbin </b></td>
-			<td>Optional Merrifield Only argument. File path for miscellaneous binary file </td>
-		</tr>
-		<tr>
 			<td><b>--csdb arg (=0)</b></td>
 			<td>
-			<p>Optional argument. Exchange the chaabi specific data block specified in --miscbin parameter</p>
+			<p>MERR/MOFD only Optional argument. Exchange the chaabi specific data block specified in --miscbin parameter</p>
 			<p>Use the command code of the provision as the input argument.
 			</td>
 		</tr>
 		<tr>
 			<td><b>--initcsdb arg (=1)</b></td>
 			<td>
-			<p>Optional argument. Signals whether command is first csdb command in a series</p>
+			<p>MERR/MOFD Optional argument. Signals whether command is first csdb command in a series</p>
 			<p>Use value of 1 means first command, else use value of 0.
 			</td>
 		</tr>
 		<tr>
 			<td><b>--finalcsdb arg (=1)</b></td>
 			<td>
-			<p>Optional argument. Signals whether command is last csdb command in a series</p>
+			<p>MERR/MOFD Optional argument. Signals whether command is last csdb command in a series</p>
 			<p>Use value of 1 means last command, else use value of 0.
 			</td>
 		</tr>
@@ -232,7 +280,7 @@
             <ol>
               <li>Disconnect the phone from the Host PC USB port, and power off the Phone.
               <li>Using the xFSTK Downloader CLI, run the command:<br>
-                  <b>xfstk-dldr-solo.exe emmcdump -r -u \<unsigned_fwdnx.bin\> -t \<token offset\> -e \<expiration duration\></b> 
+                  <b>xfstk-dldr-solo.exe --emmcdump --register -u \<unsigned_fwdnx.bin\> -t \<token offset\> -e \<expiration duration\></b> 
               <li>Immediately connect the phone to the Host PC USB port to register the token to an unsigned DnX.
             </ol>
         </ul><br>
@@ -244,9 +292,15 @@
 			<td>Unsigned firmware dnx that to be added with token/expiration time</td>
 		</tr>
 		<tr>
+			<td>--register</td>
+			<td><b>Register.</b><br>
+                             Collect a 16 byte ASCII format token which can be used while stitching the SMIP for
+                             CLVP and 32 byte ASCII format token for MOFD </td>
+		</tr>
+		<tr>
 			<td><b>token offset</b></td>
 			<td>Hex offset in unsigned firmware dnx that to store retrieved token string and its minimum
-                            and maximum expiration time. Default value is 0x108</td>
+                            and maximum expiration time. Default value for CLVP is 0x108, for MOFD is 0x10C</td>
 		</tr>
 		<tr>
 			<td><b>expiration duration</b></td>
@@ -318,7 +372,7 @@
          <ol>
            <li>Disconnect the phone from the Host PC USB port, and power off the Phone.
            <li>Using the xFSTK Downloader CLI, run the command:<br>
-               <b>xfstk-dldr-solo.exe emmcdump -dnx \<signed_fwdnx.bin\> -f \<outfile\> -p \<partition\> -b \<blocksize\> -c \<blockcount\> -o \<offset\></b>
+               <b>xfstk-dldr-solo.exe --emmcdump --fwdnx \<signed_fwdnx.bin\> -f \<outfile\> -p \<partition\> -b \<blocksize\> -c \<blockcount\> -o \<offset\></b>
            <li>Immediately connect the phone to the Host PC USB port to download the dnx and perform an eMMC Dump.
          </ol>
      </ul><br>
@@ -328,11 +382,6 @@
     \section dump_commands xFSTK Downloader eMMC Dump Commands
 
 <table>
-		<tr>
-			<td>--r</td>
-			<td><b>Register.</b><br>
-                             Collect a 16 byte ASCII format token which can be used while  stitching  the SMIP </td>
-		</tr>
 		<tr>
 			<td>--file \<filename\> --partition \<partition number\> --blocksize \<block size\> --blockcount \<count\></td>
 			<td><b>Extract</b><br>

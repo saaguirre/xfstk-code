@@ -54,6 +54,8 @@ public:
     bool Cleanup();
     bool SetStatusCallback(void(*StatusPfn)(char* Status, void* ClientData), void* ClientData);
     int GetResponse(unsigned char* buffer,int maxsize=0);
+    MerrifieldOptions *getDeviceOptions(){return DeviceSpecificOptions;}
+
 private:
     bool wehateblankbin;
     bool SetDebugLevel(unsigned long DebugLevel);
@@ -73,10 +75,7 @@ private:
     bool            abort;
     IDevice *CurrentDownloaderDevice;
     MerrifieldUtils   libutils;
-
     mrfdldrstate m_dldr_state;
-
-
     unsigned int    b_DnX_OS;
     int b_osdone;
     int b_fwdone;
@@ -86,15 +85,8 @@ private:
     int b_IDRQ;
     IOptions *CurrentDownloaderOptions;
     MerrifieldOptions *DeviceSpecificOptions;
+    void do_emmc_update(MerrifieldOptions* options);
     void do_update(MerrifieldOptions* options);
-    void do_update(
-        char * dnx_fw_name,
-        char * fw_image_name,
-        char * dnx_os_name,
-        char * os_image_name,
-        char * dnx_misc_name,
-        unsigned int gpflags
-        );
     int handle_no_size(unsigned int gpflags);
     int handle_fw_no_size(unsigned int gpflags);
     int firmware_upgrade_routine(char* dnx_fw, char* fw_image, unsigned int gpflags);

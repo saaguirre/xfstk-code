@@ -75,6 +75,14 @@ bool CloverviewPlusDownloader::UpdateTarget()
         return RetVal;
     }
 
+    if(this->DeviceSpecificOptions->IsPerformEmmcDumpEnabled())
+    {
+        this->Init();
+        this->do_emmc_update(this->DeviceSpecificOptions);
+        this->libutils.u_log(LOG_STATUS, "EMMC-DUMP: Download completed.");
+        return true;
+    }
+
     this->libutils.u_log(LOG_DOWNLOADER, "FWDnxPath -- %s", this->DeviceSpecificOptions->GetFWDnxPath());
     this->libutils.u_log(LOG_DOWNLOADER, "FWImagePath -- %s", this->DeviceSpecificOptions->GetFWImagePath());
     this->libutils.u_log(LOG_DOWNLOADER, "SoftfusesPath -- %s", this->DeviceSpecificOptions->GetSoftfusesPath());
@@ -102,6 +110,7 @@ bool CloverviewPlusDownloader::UpdateTarget()
     else {
 	this->b_continue_to_OS = false;
     }
+
     this->do_update(this->DeviceSpecificOptions);
     this->b_provisionhasstarted = true;
     last_error er;
@@ -156,8 +165,8 @@ bool CloverviewPlusDownloader::UpdateTarget()
     }
     else {
         RetVal = this->m_dldr_state.GetOsStatus();//isosdone();
-		last_error er;
-		GetLastError(&er);
+        last_error er;
+        GetLastError(&er);
         if(this->b_provisionhasstarted) {
             if((er.error_code != 0) && this->m_dldr_state.GetSFStatus()) {
                 this->libutils.u_log(LOG_STATUS, "FAIL");
@@ -266,6 +275,26 @@ void CloverviewPlusDownloader::do_abort()
 void CloverviewPlusDownloader::cleanup()
 {
     this->libutils.u_log(LOG_ENTRY, "%s", __PRETTY_FUNCTION__);
+}
+
+void CloverviewPlusDownloader::do_emmc_update(CloverviewPlusOptions* options)
+{
+    this->libutils.u_log(LOG_ENTRY, "%s", __PRETTY_FUNCTION__);
+    m_dldr_state.Init(this->CurrentDownloaderDevice, &this->libutils);
+    m_dldr_state.SetOptions(options);
+    m_dldr_state.DoEmmcUpdate(
+                            (PSTR)options->GetFWDnxPath(),
+                            options->GetEmmcFile(),
+                            options->GetEmmcTokenOffset(),
+                            options->GetEmmcExpirationDur(),
+                            options->GetEmmcPartition(),
+                            options->GetEmmcBlockSize(),
+                            options->GetEmmcBlockCount(),
+                            options->GetEmmcOffset(),
+                            options->IsEmmcUmipDumpEnabled(),
+                            options->GetUsbdelayms()
+                          );
+    this->do_abort();
 }
 
 void CloverviewPlusDownloader::do_update(CloverviewPlusOptions* options)
