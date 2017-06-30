@@ -39,13 +39,13 @@ ELSE()
 ENDIF()
 
 
-# BEGIN copy udev file
+
 SET(SRC "xfstk-sources/installer/linux/xfstk-downloader-0.0.0")
 SET(DEST "${CMAKE_BINARY_DIR}/_CPack_Packages/Linux/DEB/${CPACK_PACKAGE_FILE_NAME}")
 
 # Copy udev files
 LIST(APPEND CPACK_INSTALL_COMMANDS
-	"${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/${SRC} ${DEST}")
+	"${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/${SRC}/lib ${DEST}/lib")
 # END copy udev file
 
 # Need special permissions on Intel.ini so every user can edit it. This should then go in the user's home
@@ -111,6 +111,9 @@ ELSE()
     # SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libboost-program-options1.49.0 (>= 1.49.0-4), libusb-0.1-4 (>= 2:0.1.12-20), libusb-dev, libusb-0.1-4, qt4-default, qt4-dev, libboost-program-options-dev")
     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libboost-program-options1.53.0")
     #add ubuntu 12.04 deps rules here.
+    SET(CPACK_GENERATOR ${CPACK_GENERATOR};DEB)
+  ELSEIF ($ENV{DISTRIBUTION_NAME} MATCHES "ubuntu14.04")
+    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libboost-program-options1.55.0, libusb-0.1-4")
     SET(CPACK_GENERATOR ${CPACK_GENERATOR};DEB)
   ELSE()
      MESSAGE(FATAL_ERROR "ERROR: Environment variable: DISTRIBUTION_NAME ($ENV{DISTRIBUTION_NAME}) doesn't match anything.")
