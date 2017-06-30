@@ -53,9 +53,11 @@ MerrifieldFW::MerrifieldFW()
     m_chaabi_token_size = 0;
     m_chaabi_FW_size = 0;
     m_csdb_size = 0;
+    m_footer_size = 0;
     m_CSDBnIFWI = false;
     m_B0Plus =false;
     m_utils = NULL;
+    m_fuph_location = std::string::npos;
 }
 
 MerrifieldFW::~MerrifieldFW()
@@ -163,8 +165,16 @@ bool MerrifieldFW::Init(char *fname_dnx_fw, char *fname_fw_image, char* fname_mi
         if(!ret)
             return false;
     }
-
-    fw_data_set[FW_DATA_IFWI]->size = static_cast<int>(m_fw_image_size - m_fw_update_profile_hdr_size);
+    //if there is no footer, the FUPH does not get flashed
+    if(!m_footer_size)
+    {
+        fw_data_set[FW_DATA_IFWI]->size = static_cast<int>(m_fw_image_size - m_fw_update_profile_hdr_size);
+    }
+    //if there is a footer then fuph gets flashed
+    else
+    {
+        fw_data_set[FW_DATA_IFWI]->size = static_cast<int>(m_fw_image_size);
+    }
     fw_data_set[FW_DATA_IFWI]->data = m_ifwi_fw_block;
 
     if(csdbStatus != " " || m_CSDBnIFWI)
@@ -440,7 +450,7 @@ bool MerrifieldFW::FindFuphHeaderSignature()
 {
     const UINT fuphSignature = 0x55504824;//UPH$
     m_fw_image_size = this->m_utils->FileSize(m_fname_fw_image);
-    m_i_offset = m_fw_image_size - TWO_HUNDRED_KB;  // To check only the Last 200K Chunk of the IFWI for FUPH Header
+    m_i_offset = m_fw_image_size - (TWO_HUNDRED_KB + m_footer_size);  // To check only the Last 200K Chunk of the IFWI for FUPH Header
     while(( m_i_offset < m_fw_image_size))
     {
         if(m_tempData == fuphSignature)
@@ -570,6 +580,8 @@ bool MerrifieldFW::InitFwImage(bool)
     try{
 
         m_fw_image_size  = this->m_utils->FileSize(m_fname_fw_image);
+
+        FooterSizeInit();
         m_ifwi = new unsigned char[m_fw_image_size];
 
         if(fp_fw_image)
@@ -593,7 +605,16 @@ bool MerrifieldFW::InitFwImage(bool)
         if(FindFuphHeaderSignature())
         {
 
-            m_fw_update_profile_hdr_size = GetFuphHeaderSize();
+            if(!m_footer_size)
+            {
+                 m_fw_update_profile_hdr_size =  GetFuphHeaderSize();
+            }
+            else
+            {
+                 m_fw_update_profile_hdr_size = MERRIFIELD_B0_FW_UPDATE_PROFILE_HDR_SIZE;
+                 m_B0Plus = true;
+            }
+
 
             m_fw_update_profile_hdr = new unsigned char[m_fw_update_profile_hdr_size];
 
@@ -659,7 +680,16 @@ bool MerrifieldFW::InitFwImage(bool)
 
             this->m_utils->u_log(LOG_FWUPGRADE, "loading buffers for FUPH...");
 
-            fseek (fp_fw_image, m_ifwi_size, SEEK_SET);
+            //if there is no footer, fuph is not being flashed
+            if(!m_footer_size)
+            {
+                fseek (fp_fw_image, m_ifwi_size, SEEK_SET);
+            }
+            //if there is a foot, the fuph will be included
+            else
+            {
+                fseek (fp_fw_image, m_fuph_location, SEEK_SET);
+            }
             read_cnt = fread(m_fw_update_profile_hdr, sizeof(UCHAR), m_fw_update_profile_hdr_size, fp_fw_image);
             if(read_cnt != m_fw_update_profile_hdr_size)
             {
@@ -667,6 +697,10 @@ bool MerrifieldFW::InitFwImage(bool)
                     fclose(fp_fw_image);
 
                 throw 6;
+            }
+            if(m_footer_size>0)
+            {
+                footerChecksum();
             }
         }else {
                   if( fp_fw_image )
@@ -723,6 +757,25 @@ bool MerrifieldFW::CheckFile(char *filename)
     if(fp)
         fclose(fp);
     return ret;
+}
+
+void MerrifieldFW::footerChecksum()
+{
+
+    //calculate last 128K checksum
+    DWORD checksum = this->m_utils->dwordCheckSum(m_ifwi +(FOUR_MB - ONE28_K),ONE28_K);
+
+    //inject new last 128K checksum
+    memcpy(m_fw_update_profile_hdr + FUP_LAST_CHUNK_OFFSET*sizeof(DWORD),&checksum,sizeof(DWORD));
+
+    //recalculate fuph checksum
+    memset(m_fw_update_profile_hdr + FUP_CHKSUM_OFFSET*sizeof(DWORD),0,sizeof(DWORD));
+    checksum = this->m_utils->dwordCheckSum(m_fw_update_profile_hdr, m_fw_update_profile_hdr_size);
+
+    //inject new fuph checksum
+    memcpy(m_fw_update_profile_hdr + FUP_CHKSUM_OFFSET*sizeof(DWORD),&checksum,sizeof(DWORD));
+    return;
+
 }
 
 bool MerrifieldFW::restructFUPH()
@@ -897,6 +950,37 @@ bool MerrifieldFW::InitCSDB(const string& csdbstatus)
     {
         this->m_utils->u_log(LOG_FWUPGRADE,"%s Exception raised %s", __FUNCTION__, e.what());
         return false;
+    }
+
+}
+
+
+void MerrifieldFW::FooterSizeInit()
+{
+    size_t location =0;
+
+    this->m_footer_size = 0;
+    m_fuph_location = this->m_utils->StringLocation(this->m_fname_fw_image,string("UPH$"),false);
+    location = this->m_utils->StringLocation(this->m_fname_fw_image,string("$CFS"),false);
+
+    if((location != std::string::npos) && (m_fuph_location != std::string::npos))
+    {
+        if(location > m_fuph_location)
+        {
+            //xor compensator
+            location -= 4;
+            this->m_footer_size = this->m_utils->FileSize(this->m_fname_fw_image) - static_cast<uint32>(location);
+            this->m_utils->u_log(LOG_FWUPGRADE, "IFWI Footer found with size: 0x%X",this->m_footer_size);
+        }
+    }
+    else if((m_fuph_location != std::string::npos))
+    {
+        //if the fuph is under the 4MB it is a CFS IFWI without footer attached
+        if(m_fuph_location< FOUR_MB)
+        {
+            this->m_footer_size = 1;
+        }
+
     }
 
 }

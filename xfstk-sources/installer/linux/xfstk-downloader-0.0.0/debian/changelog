@@ -1,3 +1,9 @@
+xfstk-downloader (1.5.5) unstable; urgency=low
+
+  * [New Feature] - Added support for customer footer (MOFD platforms only).
+
+ -- Intel Corporation <xfstk@intel.com>  Wed, 14 May 2014 08:00:00 -0700
+
 xfstk-downloader (1.5.4) unstable; urgency=low
 
   * [Bug fix] BZ191905 - xfstk 1.5.3 crash on Ubuntu 12.04 and 10.04

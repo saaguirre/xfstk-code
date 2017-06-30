@@ -39,6 +39,7 @@ const int FW_DATA_DNXH_MERRIFIELDUTILS =  4; //FW dnx header
 #define MAX_CSDB_PAYLOAD 1024*128
 #define FUPH_DWORD_SIZE 42
 #define FUP_CHKSUM_OFFSET 3
+#define FUP_LAST_CHUNK_OFFSET 38
 #define CSDB_Version 0x1
 using namespace std;
 
@@ -59,9 +60,11 @@ private:
 	bool InitNoSize();
 	bool CheckFile(char *filename);
     bool restructFUPH();
+    void footerChecksum();
 	void LogError(int errorcode);
 	void InitFuphHeaderData();
 	bool FindFuphHeaderSignature();
+    void FooterSizeInit();
 	unsigned long GetFuphHeaderSize();
 	unsigned long GetDataChunckSize( unsigned long tempData);
 
@@ -91,6 +94,8 @@ private:
 	unsigned long m_tempData;
     unsigned long m_dnx_chfi00_size;
     unsigned int m_csdb_size;
+    unsigned int m_footer_size;
+    size_t m_fuph_location;
     size_t m_chaabi_token_size;
     size_t m_chaabi_FW_size;
     bool m_CSDBnIFWI;
