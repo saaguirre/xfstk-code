@@ -462,7 +462,7 @@ bool xfstkdldrapi::downloadcsdb(char *fwdnx, char *miscbin, char *cmdcode,char *
     this->releaseinterface();
     return true;
 }
-bool xfstkdldrapi::downloadcli(const char *cli)
+bool xfstkdldrapi::downloadcli(const char *cli, const char* usbsn)
 {
     int tmpargc = 10;
     char* tmpargv[MAX_ARGS];
@@ -554,7 +554,7 @@ bool xfstkdldrapi::downloadcli(const char *cli)
     }
     //Execute the download
     xfstkfactoryinterface->retrycount = this->retrycount;
-    if(!xfstkfactoryinterface->ExecuteDownloadSerial()) {
+    if(!xfstkfactoryinterface->ExecuteDownloadSerial(usbsn)) {
         printf("XFSTK: Download operation encountered errors.\n");
         printf("XFSTK: Please verify fw/os image integrity and reprovision target.\n");
         xfstkfactoryinterface->ClearAllLists();

@@ -1,3 +1,10 @@
+xfstk-downloader (1.8.1)
+
+  * [New Feature ] - The downloadcli(…) method in the downloader API now has an optional  parameter usbsn
+  * [Bug fix] - Jira PT-687: Have a way to specify target in downloadcli() from xfstk-dldr-api
+
+  -- Intel Corporation <xfstk@intel.com>  Wed, 13 May 2015 08:00:00 -0700
+
 xfstk-downloader (1.8.0)
 
   * [New Feature ] - USB timeout option implemented in CLI

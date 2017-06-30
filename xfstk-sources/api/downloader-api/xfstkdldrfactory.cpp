@@ -150,15 +150,17 @@ bool xfstkdldrfactory::ClearAllLists()
     return true;
 
 }
-bool xfstkdldrfactory::ExecuteDownloadSerial()
+bool xfstkdldrfactory::ExecuteDownloadSerial(const char *usbsn)
 {
     int numberofdevices = 0;
     int counter = 0;
     IGenericDevice *xfstkdevice = NULL;
     IDownloader *xfstkdownloader = NULL;
     last_error er;
-    bool passfail = true;
-    char message[248];
+    bool passfail = false;
+    bool usbsnTargetFlashed = false;
+    char message[512];
+    memset(message,0,sizeof(message));
 
     //Before we attempt to download ensure that all interfaces are available to complete the task
     numberofdevices = this->GetNumberOfAttachedDevices();
@@ -174,6 +176,15 @@ bool xfstkdldrfactory::ExecuteDownloadSerial()
                 return false;
             }
 
+            if(usbsn != NULL)
+            {
+                xfstkdevice->GetUsbsn(message);
+                if(strcmp(message,usbsn) != 0)
+                {
+                    break;
+                }
+                usbsnTargetFlashed = true;
+            }
             //Get the downloader interface
             xfstkdownloader = NULL;
             xfstkdownloader = this->XfstkDownloaderList.at(counter);
@@ -200,6 +211,7 @@ bool xfstkdldrfactory::ExecuteDownloadSerial()
                     void *tmphandle = NULL;
 
                     while(tmphandle == NULL) {
+                        memset(message,0,sizeof(message));
                         tmphandle = NULL;
                         tmphandle = xfstkdevice->GetDeviceHandle(0);
                         sprintf(&message[0],"XFSTK-STATUS--Reconnecting to device - Attempt #%d",counter);
@@ -237,6 +249,8 @@ bool xfstkdldrfactory::ExecuteDownloadSerial()
                     //Download completed for one device, need to break the loop
                     break;
                 }
+                if(usbsnTargetFlashed)
+                    return passfail;
             }
         }
     }

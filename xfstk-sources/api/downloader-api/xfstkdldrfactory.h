@@ -73,7 +73,7 @@ public:
     bool ClearAllLists();
     bool SetOptions(int argc, char* argv[]);
     bool BindInterfaces();
-    bool ExecuteDownloadSerial();
+    bool ExecuteDownloadSerial(const char *usbsn = NULL);
     bool ExecuteDownloadParallelAsync(char *fwdnx, char *fwimage, char *osdnx, char* osimage, char* gpflags, char* numtargets, int retrycount);
     bool ExecuteDownloadParallelSync(char *fwdnx, char *fwimage, char *osdnx, char* osimage, char* gpflags, char* numtargets, int retrycount);
     bool ExecuteDownloadSingleAsync(char *fwdnx, char *fwimage, char *osdnx, char* osimage, char* gpflags, char* usbsn, int retrycount);

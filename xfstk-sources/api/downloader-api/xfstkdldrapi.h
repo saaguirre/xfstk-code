@@ -152,10 +152,11 @@ public:
 
     /*! \brief API method to simulate CLI
      *  \param CLI string
+     *  \param usbsn serial number string of device to perform operation on.
      *  \return TRUE if operation was a success or else FALSE
      *  \exception none
      */
-    virtual bool downloadcli(const char *cli);
+    virtual bool downloadcli(const char *cli, const char* usbsn = NULL);
 
     /*! \brief Allows downloading a fwimage via spi
      *  \param fwfile is the file that is downloaded

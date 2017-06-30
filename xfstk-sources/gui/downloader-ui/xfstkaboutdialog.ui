@@ -37,7 +37,7 @@
    <item row="2" column="0">
     <widget class="QLabel" name="label">
      <property name="text">
-      <string>MCG xFSTK DLDR - Firmware &amp; Software Tool Kit Downloader</string>
+      <string>xFSTK DLDR - Firmware &amp; Software Tool Kit Downloader</string>
      </property>
     </widget>
    </item>
